@@ -32,7 +32,7 @@ for k, txt in files.items():
 # the whole skill as one zip (drop-in folder for ~/.claude/skills/)
 import base64, io, zipfile
 buf = io.BytesIO()
-with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:      # fixed dates: same input -> same bytes
+with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:      # fixed dates: same input -> same bytes
     for dp, dns, fns in sorted(os.walk(SK)):
         dns.sort()
         for fn in sorted(fns):
@@ -40,7 +40,7 @@ with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:      # fixed dates: s
                 continue
             full = os.path.join(dp, fn)
             zi = zipfile.ZipInfo(os.path.join("berger-bi-ui", os.path.relpath(full, SK)).replace(os.sep, "/"), (2026, 1, 1, 0, 0, 0))
-            zi.compress_type = zipfile.ZIP_DEFLATED
+            zi.compress_type = zipfile.ZIP_STORED            # no compression: identical bytes on every machine
             data = open(full, "rb").read()
             if not fn.endswith((".png", ".jpg", ".zip")):
                 data = data.replace(b"\r\n", b"\n")
