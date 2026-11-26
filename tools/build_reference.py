@@ -15,8 +15,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SK = os.path.join(ROOT, "skills", "berger-bi-ui")
 
 
-def read(*p):
-    return open(os.path.join(*p), encoding="utf-8").read()
+def read(*p):                                   # LF everywhere, so Windows and CI build the same bytes
+    return open(os.path.join(*p), encoding="utf-8").read().replace("\r\n", "\n")
 
 
 files = {
@@ -32,13 +32,19 @@ for k, txt in files.items():
 # the whole skill as one zip (drop-in folder for ~/.claude/skills/)
 import base64, io, zipfile
 buf = io.BytesIO()
-with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
-    for dp, _, fns in os.walk(SK):
-        for fn in fns:
+with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:      # fixed dates: same input -> same bytes
+    for dp, dns, fns in sorted(os.walk(SK)):
+        dns.sort()
+        for fn in sorted(fns):
             if fn.endswith(".pyc"):
                 continue
             full = os.path.join(dp, fn)
-            z.write(full, os.path.join("berger-bi-ui", os.path.relpath(full, SK)))
+            zi = zipfile.ZipInfo(os.path.join("berger-bi-ui", os.path.relpath(full, SK)).replace(os.sep, "/"), (2026, 1, 1, 0, 0, 0))
+            zi.compress_type = zipfile.ZIP_DEFLATED
+            data = open(full, "rb").read()
+            if not fn.endswith((".png", ".jpg", ".zip")):
+                data = data.replace(b"\r\n", b"\n")
+            z.writestr(zi, data)
 files["@@ZIP@@"] = base64.b64encode(buf.getvalue()).decode()
 
 out = read(ROOT, "src", "reference.src.html")
@@ -47,7 +53,8 @@ for k, txt in files.items():
 import re
 local = out.replace("@@ARTIFACT@@", "false")
 assert "@@" not in local, "unfilled placeholder"
-open(os.path.join(ROOT, "reference.html"), "w", encoding="utf-8").write(local)
+for name in ("reference.html", "index.html"):                    # index.html = GitHub Pages home
+    open(os.path.join(ROOT, name), "w", encoding="utf-8", newline="\n").write(local)
 
 # claude.ai Artifact variant: no document wrapper, downloads become copy,
 # and the viewer's own dark-mode switch must not flip the product tokens.
@@ -55,5 +62,5 @@ art = out.replace("@@ARTIFACT@@", "true").replace('[data-theme="dark"]', '[data-
 art = re.sub(r"<!doctype html>\s*", "", art, flags=re.I)
 art = re.sub(r"</?html[^>]*>|</?head>|</?body[^>]*>", "", art)
 os.makedirs(os.path.join(ROOT, "artifact"), exist_ok=True)
-open(os.path.join(ROOT, "artifact", "berger-bi-ui.html"), "w", encoding="utf-8").write(art)
-print("built", len(local) // 1024, "KB -> reference.html + artifact/berger-bi-ui.html")
+open(os.path.join(ROOT, "artifact", "berger-bi-ui.html"), "w", encoding="utf-8", newline="\n").write(art)
+print("built", len(local) // 1024, "KB -> reference.html, index.html, artifact/berger-bi-ui.html")

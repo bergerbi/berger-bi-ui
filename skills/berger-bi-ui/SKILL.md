@@ -1,44 +1,41 @@
 ---
 name: berger-bi-ui
-description: Berger BI visual language for dashboard demos and product screens. Use only when building or changing the UI of a Berger BI screen, page or demo (layout, KPIs, filters, insights, charts, tables, admin, login). Not for data, DAX, SQL or back-end work.
+description: Berger BI visual language for client dashboard demos and BI product screens in Hebrew (RTL). Use when building or changing the UI of a Berger BI dashboard, demo, screen or page (layout, KPIs, filters, insights, charts, tables, admin, login). Not for data, DAX, SQL or back-end work. For HTML-in-DAX Power BI visuals use powerbi-html-builder and borrow only the colors and type sizes from here.
 ---
 
-# Berger BI UI · v1.1
+# Berger BI UI
 
-## Keep it light (read first)
-- Do the task. No ceremony, no extra planning docs, no self-review loops unless asked.
-- **Never read** `bbi-charts.js`, `tokens.css` or `reference.html` into context. Copy or link them.
-- Open `docs/rules.md` (full rules, Hebrew) only when building a new screen from scratch or when asked to review against the standard. Open `docs/charts.md` only when drawing a chart.
-- Use existing classes and `BBI.*` charts. Do not write custom CSS or SVG for something the kit already has.
+## Keep it light
+- Do the task. No extra planning docs and no self-review loops unless asked.
+- **Never read** `bbi-charts.js`, `bbi-shell.js`, `tokens.css` or any `reference.html` into context. Copy them.
+- Open docs only when needed:
+  - `docs/charts.md` when drawing charts.
+  - `docs/rules.md` (Hebrew, full rules) when building a screen type not in the starter.
+  - `docs/product.md` only for a real product, not a demo.
+- Use the starter's classes and `BBI.*` charts. No custom CSS or SVG for something the kit already has.
 
-## Start a screen
-1. Copy `tokens.css` and `bbi-charts.js` next to the page. Link both. `<html lang="he" dir="rtl">`.
-2. Client color: run `python -I logo_palette.py <logo>`, then paste its `--ramp-*` line into the CLIENT block of `tokens.css`. Change nothing else.
-3. Shell: `.app > .hd + .rp + .mn + .ft`. Markup pattern: `reference.html`, part א.
-
-## Fixed layout
-- Header: client logo and product name on the right, business screens as top tabs, then search, bell and user on the left.
-- Admin (users, permissions, activity log, settings, metric glossary) lives only in the user menu.
-- Right panel, top to bottom: period, filters, insights. It collapses to a 44px rail.
-- Main: title row (title, one-line summary, demo badge, then views and export at the end). Below it the KPI band, then 6 visuals. The lead visual spans 2×2.
-- Footer: "נבנה על ידי" + Berger BI logo, and data freshness.
-- "Ask the data" is a floating round button (`.ask-fab`), bottom-left. It opens the chat panel.
-- No page scroll at 1440×900 or 1920×1080. Tables show the rows that fit, then pages.
-- More than 7 screens: use `.app.nav-side` (screens move to a right sidebar).
+## New screen or demo
+1. Copy these from `${CLAUDE_SKILL_DIR}` next to the page: `starter.html`, `tokens.css`, `bbi-charts.js`, `bbi-shell.js`, `bbi-logo.png`.
+2. Rename `starter.html` and replace its demo data. Keep its structure.
+3. Set the client color: run `python -I ${CLAUDE_SKILL_DIR}/logo_palette.py <logo>` (needs Pillow for PNG), then paste the printed `--ramp-*` line into the CLIENT block of the copied `tokens.css`.
+4. Check: open the page with `#audit` and include `bbi-audit.js`. The result must be an empty list.
 
 ## Hard rules
-- **Type:** only 12, 13, 19 and 28 (KPI numbers). Nothing below 12. Numbers use `.num`, and are wrapped in `.n`.
-- **Color:** client ramp for data. Orange only for exceptions. Green and red only for change arrows, colored by good/bad, not by direction. Grey for target and comparison.
+- **Layout:**
+  - Top tabs for screens. Admin (users, permissions, log, settings) only in the user menu.
+  - Right panel, top to bottom: period, filters, insights. It collapses.
+  - Below the title: the KPI band, then 6 visuals, with the lead one 2×2.
+  - Footer: "נבנה על ידי" + the Berger BI logo, and data freshness.
+  - Ask-the-data is a round floating button in the bottom-left corner.
+  - No page scroll at 1440×900 or 1920×1080.
+- **Type:** only 12, 13, 19, and 28 (KPI). Nothing below 12. Wrap numbers in `.n`.
+- **Color:**
+  - Client ramp for data.
+  - Red = bad (below target, a drop, late). Green = good (variance charts and arrows). Arrows are colored by good/bad, not by direction.
+  - Last year is grey. The target is a dark tick. No orange.
 - **Banned:** shadows (except menus), gradients (except loading), colored stripes on cards, icon bubbles, pastel pills, emojis, decorative sparklines.
-- **KPI:** one bordered band. Lead KPI is first and wider. Values have at most 3 significant digits: `₪14.2M`, `8.41K`. Each has a change line: `▲ 6% מול אשתקד`.
-- **Charts:** one `BBI.*` call per chart. Time runs left to right. Highlight at most 3 items. Labels on the data, no legend.
-- **Insights:** kind (word) / title with number / מה קרה / למה / צפי / מומלץ / "הראה לי". No insight that only repeats a number.
-- **Filters:** shared across tabs, kept in sessionStorage and in the URL hash.
-- **Demo:** "נתוני הדגמה" badge whenever data is not real. Never invent client data. Lock the demo with `lock.py`.
-- **Text:** plain short Hebrew. "לא הצלחנו לטעון את הנתונים", not "Error".
-
-## Every product also has
-Ask-the-data answers (number, mini chart, source, "show me"), bell alerts with user rules, saved views and share link, export (Excel / PDF / image / scheduled mail), metric definitions on hover, targets and thresholds, users, permissions matrix, append-only activity log, login with 2FA, first-login tour, and states: loading, empty, error, stale, no permission, partial. Details are in `docs/rules.md` §11.
-
-## Changing this skill
-Anyone on the team may edit. Bump `version` in `.claude-plugin/plugin.json`, add one line to `CHANGELOG.md`, run `python -I tools/build_reference.py`, and push.
+- **KPI:** one bordered band. The lead KPI comes first and is wider. Values use 3 significant digits (`₪14.2M`, `8.41K`) and have a change line (`▲ 6% מול אשתקד`).
+- **Charts:** one `BBI.*` call per chart, with `title`. Time runs left to right.
+- **Insights:** kind / title with a number / מה קרה / למה / צפי / מומלץ / "הראה לי".
+- **Demo:** show the "נתוני הדגמה" badge whenever data is not real. Never invent client data.
+- **Text:** plain short Hebrew ("לא הצלחנו לטעון את הנתונים", not "Error").

@@ -1,0 +1,23 @@
+name: check
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: JavaScript parses
+        run: for f in skills/berger-bi-ui/*.js; do node --check "$f"; done
+      - name: Plugin files are valid JSON
+        run: python -c "import json; [json.load(open(p)) for p in ('.claude-plugin/plugin.json','.claude-plugin/marketplace.json')]"
+      - name: Skill stays light
+        run: |
+          test $(wc -l < skills/berger-bi-ui/SKILL.md) -le 60 || { echo "SKILL.md over 60 lines: move detail to docs/"; exit 1; }
+          for f in skills/berger-bi-ui/docs/*.md; do test $(wc -l < "$f") -le 260 || { echo "$f over 260 lines"; exit 1; }; done
+      - name: Built pages match the source
+        run: |
+          python -I tools/build_reference.py
+          git diff --exit-code -- reference.html index.html artifact/ || { echo "Run: python -I tools/build_reference.py, then commit"; exit 1; }

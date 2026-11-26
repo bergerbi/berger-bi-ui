@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>שם המוצר</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600&family=Heebo:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<!-- Berger BI starter. Copy this file + tokens.css, bbi-charts.js, bbi-shell.js, bbi-logo.png.
+     Replace the demo data below. Keep the structure; add screens as data-screen-view blocks. -->
+</head>
+<body>
+<div class="app">
+
+  <header class="hd">
+    <div class="client"><img src="client-logo.png" alt="" onerror="this.remove()"><span class="nm">שם המוצר</span></div>
+    <nav class="tabs" aria-label="מסכים">
+      <a data-screen="overview" href="#">סקירה</a><a data-screen="sales" href="#">מכירות</a><a data-screen="customers" href="#">לקוחות</a>
+    </nav>
+    <div class="hd-end">
+      <button class="fbtn" data-act="sheet">פילטרים <span class="cnt" style="position:static" data-count="filters" hidden></span></button>
+      <div class="search"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>חיפוש<kbd>Ctrl K</kbd></div>
+      <button class="bell" data-pop="bellMenu" aria-label="התראות"><svg class="ico" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><span class="cnt">2</span></button>
+      <button class="um" data-pop="userMenu"><span class="av">דכ</span><span class="nm">דנה כהן</span></button>
+    </div>
+    <div class="menu pop bell-list" id="bellMenu" hidden style="width:320px;inset-inline-end:110px">
+      <div class="row new"><span class="acc">חריג</span><span>הצפון ירד ב-12% מול אשתקד</span><span class="mut">08:00</span></div>
+      <div class="row"><span class="t2">נתונים</span><span>הרענון הצליח</span><span class="mut">06:00</span></div>
+    </div>
+    <div class="menu" id="userMenu" hidden>
+      <button class="it">הפרופיל שלי</button>
+      <div class="grp">ניהול</div>
+      <button class="it">ניהול משתמשים</button><button class="it">הרשאות</button><button class="it">לוג פעולות</button><button class="it">הגדרות ויעדים</button><button class="it">מילון מדדים</button>
+      <hr><button class="it" data-act="theme">מצב כהה</button><button class="it" data-act="ceo">מצב מנכ"ל</button><button class="it">יציאה</button>
+    </div>
+  </header>
+
+  <aside class="rp" aria-label="פילטרים ותובנות">
+    <button class="coll" data-act="collapse" aria-label="כיווץ הפאנל"><svg class="ico" viewBox="0 0 24 24" style="width:14px"><path d="m15 6-6 6 6 6"/></svg></button>
+    <div class="rail"><button data-act="collapse" aria-label="הרחבת הפאנל"><svg class="ico" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button><button data-act="collapse" aria-label="פילטרים"><svg class="ico" viewBox="0 0 24 24"><path d="M4 5h16l-6 7.5V19l-4 1.5v-8z"/></svg><span class="cnt" data-count="filters" hidden></span></button></div>
+    <div class="rp-sec"><div class="rp-t">תקופה</div><button class="per"><svg class="ico" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>מתחילת השנה<small class="n">01.01.2026 – 31.10.2026 · מול אשתקד</small></span></button></div>
+    <div class="rp-sec">
+      <div class="rp-t">פילטרים<a class="lnk" data-act="clear">ניקוי</a></div>
+      <div class="fg"><label>אזור</label><div class="chips"><button class="chip" data-f="region" data-v="center">מרכז</button><button class="chip" data-f="region" data-v="north">צפון</button><button class="chip" data-f="region" data-v="south">דרום</button></div></div>
+    </div>
+    <div class="rp-sec grow">
+      <div class="rp-t">תובנות לתקופה (2)</div>
+      <div class="ins hi"><span class="kind">חריג</span><h4>הצפון ירד ב-<span class="n">12%</span> מול אשתקד</h4>
+        <dl><dt>מה קרה</dt><dd>הכנסות <span class="n">₪1.8M</span></dd><dt>למה</dt><dd>שני לקוחות עברו לרכש רבעוני</dd><dt>צפי</dt><dd>פער <span class="n">₪0.6M</span> בדצמבר</dd><dt>מומלץ</dt><dd>שיחת מנהל לשני הלקוחות</dd></dl>
+        <span class="show" onclick="BBIShell.set('region',['north'])">הראה לי ›</span></div>
+    </div>
+  </aside>
+  <div class="sheet-bg"></div>
+
+  <main class="mn">
+    <div class="ctx">
+      <h1>סקירה כללית</h1><p>ההכנסות ב-96% מהיעד. הצפון מסביר את רוב הפער.</p><span class="demo">נתוני הדגמה</span>
+      <div class="pa"><button class="btn2" data-pop="viewsMenu">תצוגה</button><button class="btn2" data-pop="exportMenu">ייצוא</button></div>
+    </div>
+    <div class="pop" id="viewsMenu" hidden style="inset-inline-end:110px;top:96px;width:220px"><button class="it">ברירת מחדל</button><button class="it">+ שמירת התצוגה הנוכחית</button></div>
+    <div class="pop" id="exportMenu" hidden style="inset-inline-end:18px;top:96px;width:240px"><button class="it">אקסל<small>הנתונים המסוננים</small></button><button class="it">PDF של המסך</button><button class="it">שליחה קבועה במייל</button></div>
+
+    <div class="kband num">
+      <div class="kpi lead"><div class="kpi-l">הכנסות</div><div class="kpi-v n">₪14.2M</div><div class="kpi-c"><span class="dn">▼ 4%</span><span>מהיעד</span></div><div class="tbar"><i style="width:96%"></i></div></div>
+      <div class="kpi"><div class="kpi-l">רווח גולמי</div><div class="kpi-v n">31.4%</div><div class="kpi-c"><span class="up">▲ 1.2 נק׳</span><span>מול אשתקד</span></div></div>
+      <div class="kpi"><div class="kpi-l">הזמנות</div><div class="kpi-v n">8.41K</div><div class="kpi-c"><span class="up">▲ 6%</span><span>מול אשתקד</span></div></div>
+      <div class="kpi"><div class="kpi-l">ימי גבייה</div><div class="kpi-v n">41</div><div class="kpi-c"><span class="up">▼ 6 ימים</span><span>ירידה = טוב</span></div></div>
+    </div>
+
+    <div class="grid" data-screen-view="overview">
+      <div class="card lead"><h3>הכנסות לפי חודש מול יעד</h3><span class="sub">₪ · עמודה = בפועל, קו כהה = יעד</span><div class="chart" id="c1"></div>
+        <div class="one"><b>ספטמבר נמוך ב-22% מהיעד.</b> הפער מגיע מהצפון.</div></div>
+      <div class="card"><h3>מגמת רווח גולמי</h3><span class="sub">% · 12 חודשים</span><div class="chart" id="c2"></div></div>
+      <div class="card"><h3>הלקוחות הגדולים</h3><span class="sub">₪</span><div class="chart" id="c3"></div></div>
+      <div class="card"><h3>מה הוביל מאשתקד להשנה</h3><span class="sub">₪</span><div class="chart" id="c4"></div></div>
+      <div class="card"><h3>שינוי מול אשתקד לפי אזור</h3><span class="sub">%</span><div class="chart" id="c5"></div></div>
+      <div class="card"><h3>רבעונים מול אשתקד</h3><span class="sub">₪</span><div class="chart" id="c6"></div></div>
+    </div>
+    <div class="grid" data-screen-view="sales" hidden></div>
+    <div class="grid" data-screen-view="customers" hidden></div>
+  </main>
+
+  <footer class="ft"><span class="by">נבנה על ידי<img src="bbi-logo.png" alt="Berger BI"></span><span>עודכן <span class="n">26.11.2026 06:00</span></span></footer>
+</div>
+
+<button class="ask-fab" data-act="ask" aria-label="שאלו את הנתונים"><svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px"><path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 9.5h7M8.5 12.5h4"/></svg></button>
+<div class="ask-panel" hidden>
+  <div class="sugg"><button class="chip">למה הצפון ירד?</button><button class="chip">תחזית לדצמבר</button></div>
+  <form onsubmit="event.preventDefault()"><input aria-label="שאלה" placeholder="שאלו את הנתונים…"><button class="btn1">שליחה</button></form>
+</div>
+
+<script src="bbi-charts.js"></script>
+<script src="bbi-shell.js"></script>
+<script>
+// demo data: replace with real data. Every chart is one call (docs/charts.md).
+const M = BBI.MON;
+BBI.columns('#c1', {title:'הכנסות לפי חודש מול יעד', labels:M.slice(0,10), unit:'₪',
+  values:[1.32,1.38,1.29,1.40,1.35,1.45,1.39,1.42,1.10,1.48].map(v=>v*1e6), target:1.42e6});
+BBI.line('#c2', {title:'מגמת רווח גולמי', labels:['נוב 25','דצמ','ינו 26','פבר','מרץ','אפר','מאי','יונ','יול','אוג','ספט','אוק'], unit:'%',
+  values:[28.1,28,28.6,28.3,28.9,28.7,29.5,29.4,29.8,30.6,30.1,31.4]});
+BBI.ranking('#c3', {title:'הלקוחות הגדולים', unit:'₪', items:[{name:'לקוח א',v:1.82e6},{name:'לקוח ב',v:1.43e6},{name:'לקוח ג',v:1.16e6},{name:'לקוח ד',v:9.8e5}]});
+BBI.waterfall('#c4', {title:'מה הוביל מאשתקד להשנה', unit:'₪', steps:[{name:'אשתקד',v:100e6,total:true},{name:'מחיר',v:18e6},{name:'כמות',v:9e6},{name:'הנחות',v:-14e6},{name:'השנה',v:113e6,total:true}]});
+BBI.diverging('#c5', {title:'שינוי מול אשתקד לפי אזור', unit:'%', items:[{name:'מרכז',v:8},{name:'צפון',v:-12},{name:'דרום',v:3}],
+  onClick:(i,d)=>BBIShell.set('region',[['center','north','south'][i]])});
+BBI.compare('#c6', {title:'רבעונים מול אשתקד', unit:'₪', labels:['Q1','Q2','Q3','Q4'], cur:[3.4,3.6,2.8,3.9].map(v=>v*1e6), prev:[3.0,3.3,3.1,3.5].map(v=>v*1e6)});
+document.addEventListener('bbi:state', e => { /* re-filter data and redraw here */ });
+</script>
+</body>
+</html>

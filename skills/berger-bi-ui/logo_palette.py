@@ -4,14 +4,14 @@ Usage:  python -I logo_palette.py <logo.png|logo.svg> [--json]
 
 Reads the logo's colors and ignores white, black, grays and transparent
 pixels. Takes the most common colored hue as the client color and builds a
-7-step ramp from it. It warns when that hue clashes with the fixed colors
-(orange for exceptions, green and red for good/bad). Ori approves or changes
+7-step ramp from it. It skips a hue that clashes with the fixed colors
+(red = bad, green = good). Ori approves or changes
 the suggestion; nothing is applied automatically.
 """
 import colorsys, json, re, sys
 from collections import Counter
 
-FIXED = {"accent": "#F59B00", "good": "#1F7A4D", "bad": "#B4372B"}
+FIXED = {"good": "#2E8555", "bad": "#C2412D"}
 FALLBACK = "#17537F"  # Berger navy
 # lightness steps for ramp: 9 (darkest) .. 0 (lightest)
 STEPS = {"9": .20, "7": .30, "5": .45, "3": .64, "2": .85, "1": .93, "0": .965}
@@ -74,9 +74,7 @@ def group_by_hue(cnt):
 
 
 def clash(hue):
-    if 20 <= hue <= 50:
-        return "close to the orange used for exceptions"
-    if hue < 15 or hue > 345:
+    if hue < 45 or hue > 340:
         return "close to the red used for 'bad'"
     if 95 <= hue <= 160:
         return "close to the green used for 'good'"
@@ -101,6 +99,11 @@ def ramp(hexcol):
     for k, L in STEPS.items():
         S = min(s, .75) * (1 if L < .6 else .7)
         out[k] = hex_of(tuple(c * 255 for c in colorsys.hls_to_rgb(h, L, S)))
+    # step 3 is --data-l (secondary bars): at least 3:1 against white (WCAG 1.4.11)
+    L3 = STEPS["3"]
+    while contrast_white(out["3"]) < 3 and L3 > .2:
+        L3 -= .02
+        out["3"] = hex_of(tuple(c * 255 for c in colorsys.hls_to_rgb(h, L3, min(s, .75) * .85)))
     # step 7 is --brand (white text on it): darken until it reaches 4.5:1
     L = STEPS["7"]
     while contrast_white(out["7"]) < 4.5 and L > .1:
