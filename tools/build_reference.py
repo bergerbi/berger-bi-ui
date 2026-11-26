@@ -41,6 +41,8 @@ with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:      # fixed dates: sam
             full = os.path.join(dp, fn)
             zi = zipfile.ZipInfo(os.path.join("berger-bi-ui", os.path.relpath(full, SK)).replace(os.sep, "/"), (2026, 1, 1, 0, 0, 0))
             zi.compress_type = zipfile.ZIP_STORED            # no compression: identical bytes on every machine
+            zi.create_system = 3                             # same header on Windows and Linux
+            zi.external_attr = 0o644 << 16
             data = open(full, "rb").read()
             if not fn.endswith((".png", ".jpg", ".zip")):
                 data = data.replace(b"\r\n", b"\n")
