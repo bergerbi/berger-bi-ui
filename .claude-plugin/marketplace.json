@@ -1,0 +1,7 @@
+{
+  "name": "berger-bi",
+  "owner": { "name": "Berger BI Consulting" },
+  "plugins": [
+    { "name": "berger-bi-ui", "source": "./", "description": "Berger BI visual language for demos and products" }
+  ]
+}

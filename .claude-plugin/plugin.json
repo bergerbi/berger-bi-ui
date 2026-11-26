@@ -1,0 +1,6 @@
+{
+  "name": "berger-bi-ui",
+  "version": "1.1.0",
+  "description": "Berger BI visual language for dashboard demos and product screens: layout, tokens, chart kit, rules.",
+  "author": { "name": "Berger BI Consulting" }
+}
