@@ -13,11 +13,17 @@ jobs:
         run: for f in skills/berger-bi-ui/*.js; do node --check "$f"; done
       - name: Plugin files are valid JSON
         run: python -c "import json; [json.load(open(p)) for p in ('.claude-plugin/plugin.json','.claude-plugin/marketplace.json')]"
-      - name: Skill stays light
+      - name: Skill stays light (bytes, not lines - Hebrew is token-heavy)
         run: |
-          test $(wc -l < skills/berger-bi-ui/SKILL.md) -le 60 || { echo "SKILL.md over 60 lines: move detail to docs/"; exit 1; }
-          for f in skills/berger-bi-ui/docs/*.md; do test $(wc -l < "$f") -le 260 || { echo "$f over 260 lines"; exit 1; }; done
+          test $(wc -c < skills/berger-bi-ui/SKILL.md) -le 4500 || { echo "SKILL.md over 4.5KB: move detail to docs/"; exit 1; }
+          for f in skills/berger-bi-ui/docs/*.md; do test $(wc -c < "$f") -le 22000 || { echo "$f over 22KB"; exit 1; }; done
+          test $(wc -c < skills/berger-bi-ui/starter.html) -le 16000 || { echo "starter.html over 16KB"; exit 1; }
       - name: Built pages match the source
         run: |
           python -I tools/build_reference.py
           git diff --exit-code -- reference.html index.html artifact/ || { echo "Run: python -I tools/build_reference.py, then commit"; exit 1; }
+      - name: Rule check in a real browser (all screens x desktop/dark/CEO/tablet/phone)
+        run: |
+          npm i --no-save playwright@1.49.1
+          npx playwright install --with-deps chromium
+          node tools/audit.mjs

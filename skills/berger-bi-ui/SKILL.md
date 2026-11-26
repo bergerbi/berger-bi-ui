@@ -15,10 +15,10 @@ description: Berger BI visual language for client dashboard demos and BI product
 - Use the starter's classes and `BBI.*` charts. No custom CSS or SVG for something the kit already has.
 
 ## New screen or demo
-1. Copy these from `${CLAUDE_SKILL_DIR}` next to the page: `starter.html`, `tokens.css`, `bbi-charts.js`, `bbi-shell.js`, `bbi-logo.png`.
-2. Rename `starter.html` and replace its demo data. Keep its structure.
-3. Set the client color: run `python -I ${CLAUDE_SKILL_DIR}/logo_palette.py <logo>` (needs Pillow for PNG), then paste the printed `--ramp-*` line into the CLIENT block of the copied `tokens.css`.
-4. Check: open the page with `#audit` and include `bbi-audit.js`. The result must be an empty list.
+1. Copy these from `${CLAUDE_SKILL_DIR}` next to the page: `starter.html`, `tokens.css`, `client.css`, `bbi-charts.js`, `bbi-shell.js`, `bbi-logo.png`.
+2. Rename `starter.html` and read it (15 KB, it is the template). Replace the demo data inside `draw(state)` and keep the structure. `draw` runs again on every filter change. Data that isn't real is fine, as long as it carries the "נתוני הדגמה" badge.
+3. Client color: run `python -I ${CLAUDE_SKILL_DIR}/logo_palette.py <logo>` (needs Pillow for PNG), then paste the printed line into `client.css` (10 lines). If there is no logo, skip this step.
+4. Check: open the page with `?audit` and inject `bbi-audit.js` from the browser console (don't ship it to the client). The result must be an empty list; it also fails on an empty page. To check the page at every size and in dark mode, run `node tools/audit.mjs` from the repo.
 
 ## Hard rules
 - **Layout:**

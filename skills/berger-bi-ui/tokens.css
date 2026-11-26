@@ -6,7 +6,7 @@
    ============================================================================ */
 
 :root{
-  /* ---- CLIENT: one ramp from the logo (9 = darkest) ---- */
+  /* ---- CLIENT ramp: Berger defaults. Per client, override in client.css (never edit here) ---- */
   --ramp-9:#0B3A5C; --ramp-7:#17537F; --ramp-5:#3F78A6; --ramp-3:#6A93BA;
   --ramp-2:#CFE0EE; --ramp-1:#E6EFF7; --ramp-0:#F2F7FB;
 
@@ -16,7 +16,7 @@
   --data-xl:var(--ramp-1);   /* forecast band, selected background */
   --brand:var(--ramp-7);     /* active tab, main button, links; >= 4.5:1 with white */
   --strong:var(--ramp-9);    /* start/end bars, avatar */
-  --cmp:#8E99A5;             /* last year / comparison only (target is a dark tick) */
+  --cmp:#7E8995;             /* last year / comparison only (target is a dark tick) */
   --on-brand:#FFFFFF; --on-strong:#FFFFFF;
 
   /* ---- FIXED: never changes, whatever the logo ---- */
@@ -27,12 +27,12 @@
   --ghost:#CBD2D8; --line:#E3E7EB; --grid:#EEF0F2;
   --bg:#F4F6F8; --surface:#FFFFFF; --hover:#F1F6FA;
   --demo-bg:#FFF3C4; --demo-ink:#6B5000; --demo-line:#EED77E;
-  --pop-bg:#1D2125; --pop-text:#E8ECF0;                            /* tooltip, toast */
+  --pop-bg:#1D2125; --pop-text:#E8ECF0; --pop-good:#7ED6A5; --pop-bad:#FF9B8F;   /* tooltip, toast (dark box) */
 
   /* ---- TYPE: 3 text sizes + one number size. Nothing else. ---- */
   --fs-s:12px; --fs-m:13px; --fs-l:19px; --fs-kpi:28px;
   --f-ui:"Heebo","Segoe UI",Arial,sans-serif;
-  --f-body:"Assistant","Segoe UI",Arial,sans-serif;
+  --f-body:var(--f-ui);   /* one font: Heebo has tabular digits by default; Assistant has none (measured) */
 
   /* ---- SHAPE / DEPTH / MOTION ---- */
   --r-card:10px; --r-ctl:8px; --r-chip:6px; --r-bar:3px;
@@ -52,12 +52,12 @@
 [data-theme="dark"]{
   color-scheme:dark;
   --surface:#151A20; --bg:#0F1318; --line:#2A323B; --grid:#232A32; --hover:#1B222A;
-  --ink:#E8ECF0; --text:#C9D0D7; --text-2:#A4ADB6; --text-3:#8D97A1; --ghost:#3A434D; --cmp:#4A5560;
+  --ink:#E8ECF0; --text:#C9D0D7; --text-2:#A4ADB6; --text-3:#8D97A1; --ghost:#3A434D; --cmp:#7A8693;
   --data:var(--ramp-3); --data-l:var(--ramp-5); --data-xl:color-mix(in srgb,var(--ramp-7) 30%,#0F1318); --brand:var(--ramp-3); --strong:var(--ramp-2);
   --good:#5BBE8A; --bad:#E57A6E; --good-mark:#4FAE7C; --bad-mark:#E0675A; --bad-xl:#3A1F1C;
   --on-brand:#0F1318; --on-strong:#0F1318;
   --demo-bg:#3A3210; --demo-ink:#F3DD8A; --demo-line:#5E5220;
-  --pop-bg:#E8ECF0; --pop-text:#1D2125;
+  --pop-bg:#E8ECF0; --pop-text:#1D2125; --pop-good:#1F7A4D; --pop-bad:#B4372B;
 }
 
 /* ---------- base ---------- */
@@ -91,9 +91,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hd-end{margin-inline-start:auto;display:flex;align-items:center;gap:10px}
 .search{display:flex;align-items:center;gap:8px;width:210px;height:32px;padding:0 10px;border:1px solid var(--line);border-radius:var(--r-ctl);color:var(--text-3);font-size:var(--fs-s)}
 .search kbd{margin-inline-start:auto;font:var(--fs-s) var(--f-ui);border:1px solid var(--line);border-radius:4px;padding:0 4px}
-.bell{position:relative;width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);border-radius:var(--r-ctl);color:var(--text-2);cursor:pointer}
+.bell{position:relative;width:32px;height:32px;display:grid;place-items:center;background:transparent;border:1px solid var(--line);border-radius:var(--r-ctl);color:var(--text-2);cursor:pointer}
 .cnt{position:absolute;top:-6px;inset-inline-end:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:4px;background:var(--strong);color:var(--on-strong);font:600 var(--fs-s)/18px var(--f-ui);text-align:center}
-.um{display:flex;align-items:center;gap:8px;padding:4px 8px;border:1px solid var(--line);border-radius:var(--r-ctl);font-family:var(--f-ui);font-size:var(--fs-s);color:var(--ink);cursor:pointer}
+.um{display:flex;align-items:center;gap:8px;padding:4px 8px;background:transparent;border:1px solid var(--line);border-radius:var(--r-ctl);font-family:var(--f-ui);font-size:var(--fs-s);color:var(--ink);cursor:pointer}
 .av{width:24px;height:24px;border-radius:50%;background:var(--strong);color:var(--on-strong);display:grid;place-items:center;font-size:var(--fs-s);font-weight:600}
 .menu{position:absolute;inset-inline-end:var(--pad);top:calc(100% - 2px);z-index:var(--z-menu);width:228px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh-pop);padding:6px;font-family:var(--f-ui)}
 .menu .grp{font-size:var(--fs-s);color:var(--text-3);padding:8px 10px 2px}
@@ -132,6 +132,15 @@ button,input,select,textarea{font:inherit;color:inherit}
 .ctx p{margin:0;color:var(--text-2);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ctx h1,.ctx .demo{white-space:nowrap;flex:none}
 .ctx .pa{margin-inline-start:auto;display:flex;gap:6px}          /* page actions: views, export */
+/* applied filters under the title: what the numbers are filtered by, one click to clear */
+.applied{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:var(--fs-s);color:var(--text-2);margin-top:-4px}
+.applied .chip{display:inline-flex;gap:6px;align-items:center}
+.applied .chip::after{content:"✕";color:var(--text-3)}
+/* period picker */
+.per-pop{width:260px;padding:8px}
+.per-pop .grid2{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.per-pop .it.on{background:var(--data-xl);color:var(--ink);font-weight:600}
+.per-pop label{display:block;font-size:var(--fs-s);color:var(--text-3);margin:8px 4px 4px}
 .demo{padding:3px 9px;background:var(--demo-bg);color:var(--demo-ink);border:1px solid var(--demo-line);border-radius:var(--r-chip);font-family:var(--f-ui);font-size:var(--fs-s);font-weight:500}
 .stale{display:flex;gap:10px;align-items:center;padding:6px 12px;border:1px solid var(--text-3);background:var(--surface);border-radius:var(--r-ctl);font-size:var(--fs-s);color:var(--ink)}
 
@@ -224,7 +233,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tour{position:fixed;z-index:var(--z-modal);width:280px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:12px 14px;box-shadow:var(--sh-pop)}
 .tour-hole{position:fixed;z-index:calc(var(--z-modal) - 1);border:2px solid var(--brand);border-radius:var(--r-ctl);box-shadow:0 0 0 9999px rgba(15,19,24,.35);pointer-events:none}
 .fbtn{align-items:center;gap:6px;height:32px;padding:0 10px;border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--surface);color:var(--text);font:var(--fs-s) var(--f-ui);cursor:pointer}
-.toast button{all:unset;cursor:pointer;color:var(--ramp-3);font-weight:600}
+.toast button{all:unset;cursor:pointer;color:var(--ramp-2);font-weight:600}
+.toast button:focus-visible{outline:2px solid var(--pop-text);outline-offset:2px}
+.tip .up{color:var(--pop-good)} .tip .dn,.tip .acc{color:var(--pop-bad)}
+[data-theme="dark"] .ft .by img{filter:brightness(0) invert(.85)}   /* Berger BI logo stays visible in dark mode */
 
 /* tablet 760-1199: panel becomes a bottom sheet opened by .fbtn; 2 chart columns */
 .fbtn,.sheet-bg{display:none}

@@ -145,7 +145,7 @@ if __name__ == "__main__":
         print("client color:", res["client_color"])
         print("logo colors :", ", ".join(f"{g['hex']} ({int(g['share']*100)}%)" for g in res["logo_colors"]))
         print("ramp        :", " ".join(f"{k}:{v}" for k, v in res["ramp"].items()))
-        print("paste into tokens.css CLIENT block:")
+        print("paste into client.css (inside :root{ }):")
         print("  " + " ".join(f"{k}:{v};" for k, v in res["tokens"].items()))
         print("brand vs white:", res["brand_contrast"], ": 1 (min 4.5)")
         for n in res["notes"]:

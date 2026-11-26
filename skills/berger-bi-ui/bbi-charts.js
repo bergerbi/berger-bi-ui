@@ -1,5 +1,5 @@
 /* ============================================================================
-   bbi-charts.js · Berger BI chart kit · v1.2 · no dependencies
+   bbi-charts.js · Berger BI chart kit · no dependencies
    Draws at the element's real pixel size and redraws on resize. Chart text uses
    --fs-s (12px, larger in CEO mode). Colors come from tokens.css. Every chart
    has real axes, a tooltip with comparison, hover dimming, optional onClick,
@@ -32,7 +32,7 @@
     if (!num(v)) return "–";
     const a = Math.abs(v);
     if (unit === "%" || unit === "pp") {
-      let r = a < 10 ? Math.round(a * 10) / 10 : Math.round(a);
+      let r = a < 100 ? Math.round(a * 10) / 10 : Math.round(a);          // 3 significant digits: 31.4%, 4.2%, 112%
       if (r === 0) return unit === "%" ? "0%" : "0 נק׳";
       return (v < 0 ? "−" : "") + r + (unit === "%" ? "%" : " נק׳");
     }
@@ -40,7 +40,7 @@
     let s;
     if (a < 1000) s = String(Number.isInteger(a) ? a : sig(a));
     else {
-      const steps = [[1e9, "B"], [1e6, "M"], [1e3, "K"]];
+      const steps = [[1e12, "T"], [1e9, "B"], [1e6, "M"], [1e3, "K"]];
       let i = steps.findIndex(([d]) => a >= d);
       let r = sig(a / steps[i][0]);
       if (r >= 1000 && i > 0) { i--; r = sig(a / steps[i][0]); }        // 999,600 -> 1M, not 1000K
@@ -95,8 +95,14 @@
     el.addEventListener("pointermove", ev => { dim(svg, i); showTip(ev, title, rows()); });
     el.addEventListener("pointerdown", ev => { if (ev.pointerType !== "mouse") { dim(svg, i); showTip(ev, title, rows()); } });
     el.addEventListener("pointerleave", () => { dim(svg); hideTip(); });
-    if (o.onClick) { el.style.cursor = "pointer"; el.addEventListener("click", () => o.onClick(i, datum)); }
+    if (o.onClick) {                                      // clickable marks are keyboard-reachable too
+      el.style.cursor = "pointer"; el.setAttribute("tabindex", "0"); el.setAttribute("role", "button");
+      el.setAttribute("aria-label", title);
+      el.addEventListener("click", () => o.onClick(i, datum));
+      el.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); o.onClick(i, datum); } });
+    }
   }
+  let UID = 0;                                            // unique ids for patterns per chart
 
   /* ---------- mount ---------- */
   function mount(el, o, draw, empty) {
@@ -112,7 +118,11 @@
       svg.style.cssText = "direction:ltr;display:block;overflow:visible";
       meas = null;
       if (empty) { T(svg, w / 2, h / 2, "אין נתונים לתקופה שנבחרה", "tx", "middle"); return; }
-      draw(svg, w, h, parseFloat(getComputedStyle(el).fontSize) || 12);
+      try { draw(svg, w, h, parseFloat(getComputedStyle(el).fontSize) || 12); }
+      catch (err) {                                     // one bad chart never stops the others
+        console.error("BBI chart:", o.title || el.id, err);
+        svg.innerHTML = ""; T(svg, w / 2, h / 2, "לא הצלחנו להציג את הגרף", "tx", "middle");
+      }
     };
     if (el._bbiRO) el._bbiRO.disconnect();
     el._bbiRO = new ResizeObserver(() => requestAnimationFrame(render)); el._bbiRO.observe(el);
@@ -121,9 +131,11 @@
 
   /* ---------- axes ---------- */
   function yAxis(svg, ticks, y, x0, x1, unit, title, fs) {
-    ticks.forEach(v => {
+    const gap = ticks.length > 1 ? Math.abs(y(ticks[0]) - y(ticks[1])) : 99;
+    const every = Math.max(1, Math.ceil(fs * 1.5 / Math.max(1, gap)));   // short chart: label every 2nd/3rd line
+    ticks.forEach((v, i) => {
       S("line", { x1: x0, x2: x1, y1: y(v), y2: y(v), class: v === 0 ? "ax" : "gl" }, svg);
-      T(svg, x0 - 6, y(v) + fs / 3, fmt(v, unit), "tx", "end");
+      if (i % every === 0) T(svg, x0 - 6, y(v) + fs / 3, fmt(v, unit), "tx", "end");
     });
     if (title) T(svg, x0 - 6, y(ticks[ticks.length - 1]) - fs, title, "tx", "end");
   }
@@ -153,33 +165,42 @@
   function columns(el, o) {
     const v = o.values || [], n = v.length;
     mount(el, o, (svg, w, h, fs) => {
+      const hid = "bbi-h" + (++UID);
       const tg = arr(o.target, n), thr = o.threshold || .9, hi = new Set(o.highlight || []);
       const fin = v.concat(tg || []).filter(num);
       const L0 = 8, top = fs * 2, bot = fs + 12, R = tg ? tw(svg, o.targetName || "יעד") + 10 : 8;
-      const ticks = nice(Math.min(0, ...fin), Math.max(0, ...fin), Math.floor((h - top - bot) / 34));
+      const ticks = nice(Math.min(0, ...fin), Math.max(0, ...fin), Math.floor((h - top - bot) / Math.max(34, fs * 2.8)));
       const L = Math.max(L0, yLeft(svg, ticks, o.unit));
       const y = lin(ticks[0], ticks[ticks.length - 1], h - bot, top);
       const bw = (w - L - R) / n, bar = Math.max(4, Math.min(28, bw * .55)), xc = i => L + bw * i + bw / 2;
       yAxis(svg, ticks, y, L, w - R, o.unit, o.yTitle, fs);
       if (tg) {                                   // IBCS: target = dark tick, grey is reserved for last year
         tg.forEach((t, i) => { if (num(t)) S("line", { x1: xc(i) - bar / 2 - 4, x2: xc(i) + bar / 2 + 4, y1: y(t), y2: y(t), style: "stroke:var(--ink);stroke-width:2" }, svg); });
-        T(svg, w - R + 4, y(tg[n - 1]) + fs / 3, o.targetName || "יעד", "tx");
+        // "יעד" sits right of the last bar; if the last value label would reach it, it moves above the first bar
+        const lastLab = num(v[n - 1]) ? xc(n - 1) + tw(svg, fmt(v[n - 1], o.unit), "tv") / 2 : 0;
+        if (lastLab < w - R + 2) T(svg, w - R + 4, y(tg[n - 1]) + fs / 3, o.targetName || "יעד", "tx");
+        else T(svg, xc(0) - bw / 2 + 2, y(tg[0]) - 6, o.targetName || "יעד", "tx");
       }
-      const emph = o.emphasis || "last";
+      const emph = o.emphasis || "last", placed = [];
       v.forEach((val, i) => {
         if (!num(val)) return;
         const exc = tg ? num(tg[i]) && val < tg[i] * thr : hi.has(i);
         const strong = emph === "all" || hi.has(i) || (emph === "last" && i === n - 1);
-        const fill = exc ? EXC : (o.partialLast && i === n - 1 ? "url(#bbi-hatch)" : strong ? DATA : DATAL);
+        const fill = exc ? EXC : (o.partialLast && i === n - 1 ? "url(#" + hid + ")" : strong ? DATA : DATAL);
         const r = S("rect", { x: xc(i) - bar / 2, y: Math.min(y(val), y(0)), width: bar, height: Math.max(1, Math.abs(y(val) - y(0))), rx: 3, style: "fill:" + fill }, svg);
         if (exc || i === n - 1) {
-          const neg = val < 0;
-          T(svg, xc(i), neg ? y(val) + fs + 3 : y(val) - 5, fmt(val, o.unit), "tv", "middle", exc ? "fill:var(--bad)" : null);
+          const neg = val < 0, s = fmt(val, o.unit), lw = tw(svg, s, "tv");
+          const ly = neg ? y(val) + fs + 3 : Math.min(y(val), tg && num(tg[i]) ? y(tg[i]) : Infinity) - 5;
+          // collision pass: a label that would touch an earlier one is dropped (exceptions come first)
+          if (!placed.some(p => Math.abs(p.x - xc(i)) < (p.w + lw) / 2 + 4 && Math.abs(p.y - ly) < fs + 2)) {
+            T(svg, xc(i), ly, s, "tv", "middle", exc ? "fill:var(--bad)" : null);
+            placed.push({ x: xc(i), y: ly, w: lw });
+          }
         }
         bind(svg, r, i, o.labels[i], () => [["בפועל", fmt(val, o.unit)]].concat(tg && num(tg[i]) ? [["יעד", fmt(tg[i], o.unit)], ["פער", fmt((val / tg[i] - 1) * 100, "%"), val < tg[i] ? "acc" : ""]] : []), o, { label: o.labels[i], value: val });
       });
       if (o.partialLast) {
-        const d = S("defs", {}, svg), p = S("pattern", { id: "bbi-hatch", width: 5, height: 5, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" }, d);
+        const d = S("defs", {}, svg), p = S("pattern", { id: hid, width: 5, height: 5, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" }, d);
         S("rect", { width: 5, height: 5, style: "fill:var(--data-xl)" }, p); S("line", { x1: 0, y1: 0, x2: 0, y2: 5, style: "stroke:var(--data);stroke-width:2" }, p);
       }
       xLabels(svg, o.labels, xc, h - bot, L, w - R, fs);
@@ -189,24 +210,27 @@
   /* ---------- 2. line + forecast (time axis) ---------- */
   function line(el, o) {
     const v = o.values || [], f = o.forecast, nA = v.length, nF = f ? f.values.length : 0, n = nA + nF;
+    let lastReal = nA - 1; while (lastReal > 0 && !num(v[lastReal])) lastReal--;
     mount(el, o, (svg, w, h, fs) => {
-      const fin = v.concat(f ? f.lo.concat(f.hi, f.values) : []).filter(num);
+      const lo = f ? f.lo || f.values : [], hi = f ? f.hi || f.values : [];
+      const fin = v.concat(f ? lo.concat(hi, f.values) : []).filter(num);
       const top = fs * 2, bot = fs + 12;
-      const ticks = nice(Math.min(...fin), Math.max(...fin), Math.floor((h - top - bot) / 34));
-      const L = yLeft(svg, ticks, o.unit), last = nA - 1;
+      const ticks = nice(Math.min(...fin), Math.max(...fin), Math.floor((h - top - bot) / Math.max(34, fs * 2.8)));
+      const L = yLeft(svg, ticks, o.unit), last = lastReal;
       const endLab = f ? fmt(f.values[nF - 1], o.unit) : fmt(v[last], o.unit), R = tw(svg, endLab, "tv") + 12;
       const y = lin(ticks[0], ticks[ticks.length - 1], h - bot, top);
       const step = (w - L - R) / Math.max(1, n - 1), x = i => L + step * i;
       yAxis(svg, ticks, y, L, w - R, o.unit, o.yTitle, fs);
       if (f) {
-        const up = f.hi.map((t, i) => `${x(last + 1 + i)},${y(t)}`), dn = f.lo.map((t, i) => `${x(last + 1 + i)},${y(t)}`).reverse();
+        const up = hi.map((t, i) => `${x(last + 1 + i)},${y(t)}`), dn = lo.map((t, i) => `${x(last + 1 + i)},${y(t)}`).reverse();
         S("polygon", { points: [`${x(last)},${y(v[last])}`].concat(up, dn).join(" "), style: "fill:var(--data-xl)" }, svg);
         S("polyline", { points: [`${x(last)},${y(v[last])}`].concat(f.values.map((t, i) => `${x(last + 1 + i)},${y(t)}`)).join(" "), fill: "none", style: "stroke:var(--data);stroke-width:2;stroke-dasharray:5 4" }, svg);
         S("line", { x1: x(last), x2: x(last), y1: top - 4, y2: h - bot, style: "stroke:var(--ink);stroke-dasharray:3 3" }, svg);
         T(svg, x(last) + 4, top - 6, "היום", "tx");
         T(svg, x(n - 1) + 6, y(f.values[nF - 1]) + fs / 3, endLab, "tv");
       }
-      S("polyline", { points: v.map((t, i) => num(t) ? `${x(i)},${y(t)}` : "").join(" "), fill: "none", style: "stroke:var(--data);stroke-width:2" }, svg);
+      let seg = [];                                       // a gap in the data is a gap in the line
+      v.forEach((t, i) => { if (num(t)) seg.push(`${x(i)},${y(t)}`); if ((!num(t) || i === nA - 1) && seg.length) { S("polyline", { points: seg.join(" "), fill: "none", style: "stroke:var(--data);stroke-width:2" }, svg); seg = []; } });
       if (nA === 1 || !f) S("circle", { cx: x(last), cy: y(v[last]), r: 3.5, style: "fill:var(--data)" }, svg);
       if (!f) T(svg, x(last) + 6, y(v[last]) + fs / 3, fmt(v[last], o.unit), "tv");
       else T(svg, x(last) - 6, y(v[last]) - 8, fmt(v[last], o.unit), "tv", "end");
@@ -218,7 +242,7 @@
       const move = ev => {
         const i = at(ev), isF = i > last, val = isF ? f.values[i - nA] : v[i];
         ch.setAttribute("x1", x(i)); ch.setAttribute("x2", x(i)); ch.setAttribute("visibility", "visible");
-        showTip(ev, labels[i] || "", [[isF ? "תחזית" : "בפועל", fmt(val, o.unit)]].concat(isF ? [["טווח", fmt(f.lo[i - nA], o.unit) + "–" + fmt(f.hi[i - nA], o.unit)]] : i > 0 ? [["שינוי", fmt(v[i] - v[i - 1], o.unit === "%" ? "pp" : o.unit)]] : []));
+        showTip(ev, labels[i] || "", [[isF ? "תחזית" : "בפועל", fmt(val, o.unit)]].concat(isF ? [["טווח", fmt(lo[i - nA], o.unit) + "–" + fmt(hi[i - nA], o.unit)]] : i > 0 ? [["שינוי", fmt(v[i] - v[i - 1], o.unit === "%" ? "pp" : o.unit)]] : []));
       };
       hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move);
       hit.addEventListener("pointerleave", () => { ch.setAttribute("visibility", "hidden"); hideTip(); });
@@ -230,8 +254,9 @@
   function compare(el, o) {
     const n = (o.cur || []).length;
     mount(el, o, (svg, w, h, fs) => {
-      const fin = o.cur.concat(o.prev).filter(num), top = fs * 2 + 4, bot = fs + 12;
-      const ticks = nice(Math.min(0, ...fin), Math.max(0, ...fin), Math.floor((h - top - bot) / 34));
+      const prevA = o.prev || [], hid = "bbi-h" + (++UID);
+      const fin = o.cur.concat(prevA).filter(num), top = fs * 2 + 4, bot = fs + 12;
+      const ticks = nice(Math.min(0, ...fin), Math.max(0, ...fin), Math.floor((h - top - bot) / Math.max(34, fs * 2.8)));
       const L = yLeft(svg, ticks, o.unit), R = 8;
       const y = lin(ticks[0], ticks[ticks.length - 1], h - bot, top);
       const bw = (w - L - R) / n, bar = Math.max(4, Math.min(20, bw * .32)), xc = i => L + bw * i + bw / 2;
@@ -242,13 +267,19 @@
       const k2 = kx - 24 - tw(svg, cn);
       S("rect", { x: k2 - 10, y: 2, width: 10, height: 10, rx: 2, style: "fill:var(--cmp)" }, svg); T(svg, k2 - 14, 11, pn, "tx", "end");
       for (let i = 0; i < n; i++) {
-        const p = o.prev[i], c = o.cur[i], g = S("g", {}, svg);
+        const p = prevA[i], c = o.cur[i], g = S("g", {}, svg);
         if (num(p)) S("rect", { x: xc(i) - bar - 1, y: Math.min(y(p), y(0)), width: bar, height: Math.max(1, Math.abs(y(p) - y(0))), rx: 3, style: "fill:var(--cmp)" }, g);
-        const exc = num(c) && num(p) && p > 0 && c < p * (o.threshold || .95);
-        if (num(c)) S("rect", { x: xc(i) + 1, y: Math.min(y(c), y(0)), width: bar, height: Math.max(1, Math.abs(y(c) - y(0))), rx: 3, style: "fill:" + (exc ? EXC : DATA) }, g);
-        bind(svg, g, i, o.labels[i], () => [[cn, fmt(c, o.unit)], [pn, fmt(p, o.unit)], ["שינוי", num(p) && p !== 0 ? fmt((c / p - 1) * 100, "%") : "–", c < p ? "dn" : "up"]], o, { label: o.labels[i], cur: c, prev: p });
+        const partial = o.partialLast && i === n - 1;            // open period: hatched, never judged red
+        const exc = !partial && num(c) && num(p) && p > 0 && c < p * (o.threshold || .95);
+        if (num(c)) S("rect", { x: xc(i) + 1, y: Math.min(y(c), y(0)), width: bar, height: Math.max(1, Math.abs(y(c) - y(0))), rx: 3, style: "fill:" + (partial ? "url(#" + hid + ")" : exc ? EXC : DATA) }, g);
+        bind(svg, g, i, o.labels[i], () => [[cn, fmt(c, o.unit)], [pn, fmt(p, o.unit)], ["שינוי", partial ? "תקופה פתוחה" : num(p) && p !== 0 ? fmt((c / p - 1) * 100, "%") : "–", partial ? "" : c < p ? "dn" : "up"]], o, { label: o.labels[i], cur: c, prev: p });
       }
-      xLabels(svg, o.labels, xc, h - bot, L, w - R, fs);
+      if (o.partialLast) {
+        const d = S("defs", {}, svg), pt = S("pattern", { id: hid, width: 5, height: 5, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" }, d);
+        S("rect", { width: 5, height: 5, style: "fill:var(--data-xl)" }, pt); S("line", { x1: 0, y1: 0, x2: 0, y2: 5, style: "stroke:var(--data);stroke-width:2" }, pt);
+      }
+      const labs = o.partialLast ? o.labels.map((l, i) => i === n - 1 ? l + " (" + (o.partialLabel || "חלקי") + ")" : l) : o.labels;
+      xLabels(svg, labs, xc, h - bot, L, w - R, fs);
     }, !n);
   }
 
@@ -266,12 +297,12 @@
       const nameW = Math.min(w * .4, Math.max(...it.map(d => tw(svg, d.name))) + 10);
       const valW = Math.max(...it.map(d => tw(svg, fmt(d.v, o.unit), "tv"))) + 8;
       const rh = h / n, bh = Math.min(16, rh * .62), xR = w - nameW;
-      const max = Math.max(...it.filter(d => !d.others).map(d => Math.abs(d.v)), 1e-9);
+      const max = Math.max(...it.map(d => Math.abs(d.v)), 1e-9);
       const len = v => Math.max(1, (xR - valW - 4) * Math.min(1, Math.abs(v) / max));
       it.forEach((d, i) => {
         const yc = rh * i + rh / 2, g = S("g", {}, svg);
         T(g, w - 2, yc + fs / 3, ellipsis(svg, d.name, nameW - 8), "tx", "end");
-        const fill = d.others ? "var(--ghost)" : d.exception ? EXC : i < top ? DATA : DATAL;
+        const fill = d.others ? "var(--ghost)" : d.exception || d.v < 0 ? EXC : i < top ? DATA : DATAL;
         S("rect", { x: xR - len(d.v), y: yc - bh / 2, width: len(d.v), height: bh, rx: 3, style: "fill:" + fill }, g);
         T(g, xR - len(d.v) - 5, yc + fs / 3, fmt(d.v, o.unit), "tv", "end");
         bind(svg, g, i, d.name, () => [["ערך", fmt(d.v, o.unit)], ["מקום", d.others ? "–" : String(i + 1)]], o, d);
@@ -283,10 +314,19 @@
   function waterfall(el, o) {
     const steps = o.steps || [];
     mount(el, o, (svg, w, h, fs) => {
+      let st = steps;
+      const fitW = Math.max(4, Math.floor(w / 52));
+      if (st.length > fitW) {                            // keep totals + the biggest moves, merge the rest
+        const mid = st.filter(d => !d.total), keep = new Set(mid.slice().sort((a, b) => Math.abs(b.v) - Math.abs(a.v)).slice(0, fitW - 3));
+        const out = []; let other = 0, oc = 0;
+        st.forEach((d, i) => { if (d.total || keep.has(d)) { if (oc && (d.total && i === st.length - 1)) { out.push({ name: (o.othersName || "אחרים") + " (" + oc + ")", v: other }); oc = 0; } out.push(d); } else { other += d.v; oc++; } });
+        if (oc) out.push({ name: (o.othersName || "אחרים") + " (" + oc + ")", v: other });
+        st = out;
+      }
       let run = 0;
-      const seg = steps.map(s => { if (s.total) { run = s.v; return { s, a: 0, b: s.v }; } const a = run; run += s.v; return { s, a, b: run }; });
+      const seg = st.map(s => { if (s.total) { run = s.v; return { s, a: 0, b: s.v }; } const a = run; run += s.v; return { s, a, b: run }; });
       const all = seg.flatMap(d => [d.a, d.b]), top = fs * 2, bot = fs + 12;
-      const ticks = nice(Math.min(0, ...all), Math.max(...all), Math.floor((h - top - bot) / 34));
+      const ticks = nice(Math.min(0, ...all), Math.max(...all), Math.floor((h - top - bot) / Math.max(34, fs * 2.8)));
       const L = yLeft(svg, ticks, o.unit), R = 8;
       const y = lin(ticks[0], ticks[ticks.length - 1], h - bot, top);
       const n = seg.length, bw = (w - L - R) / n, bar = Math.min(44, bw * .62), xc = i => L + bw * i + bw / 2;
@@ -309,8 +349,14 @@
 
   /* ---------- 6. diverging change (names right) ---------- */
   function diverging(el, o) {
-    const it = (o.items || []).filter(d => num(d.v));
+    const it0 = (o.items || []).filter(d => num(d.v));
     mount(el, o, (svg, w, h, fs) => {
+      const fitN = Math.max(2, Math.floor(h / (fs + 10)));
+      let it = it0;
+      if (it0.length > fitN) {
+        const byAbs = it0.slice().sort((a, b) => Math.abs(b.v) - Math.abs(a.v)), rest = byAbs.slice(fitN - 1);
+        it = byAbs.slice(0, fitN - 1).concat([{ name: (o.othersName || "אחרים") + " (" + rest.length + ")", v: rest.reduce((t, d) => t + d.v, 0) }]);
+      }
       const n = it.length, unit = o.unit || "%";
       const nameW = Math.min(w * .35, Math.max(...it.map(d => tw(svg, d.name))) + 12);
       const labW = Math.max(...it.map(d => tw(svg, (d.v > 0 ? "+" : "") + fmt(d.v, unit), "tv"))) + 8;
@@ -326,7 +372,7 @@
         T(g, d.v >= 0 ? x(d.v) + 5 : x(d.v) - 5, yc + fs / 3, (d.v > 0 ? "+" : "") + fmt(d.v, unit), "tv", d.v >= 0 ? "start" : "end", fill === EXC ? "fill:var(--bad)" : null);
         bind(svg, g, i, d.name, () => [["שינוי", (d.v > 0 ? "+" : "") + fmt(d.v, unit), isBad ? "dn" : "up"]], o, d);
       });
-    }, !it.length);
+    }, !it0.length);
   }
 
   /* ---------- 7. gantt with a real date axis ---------- */
@@ -340,16 +386,16 @@
       const nameW = Math.min(w * .35, Math.max(...tasks.map(d => tw(svg, d.name))) + 12);
       const x = lin(f, t, 4, w - nameW - 4), rh = (h - top - bot) / tasks.length, bh = Math.min(14, rh * .55);
       // months, or quarters when months are too narrow
-      const monthW = (x(f + 30 * day) - x(f)), every = monthW < tw(svg, "ספט 26") + 8 ? 3 : 1;
+      const monthW = (x(f + 30 * day) - x(f)), every = monthW < tw(svg, "ספט 26") + 8 ? (monthW * 3 < tw(svg, "Q4 26") + 8 ? 12 : 3) : 1;
       const d0 = new Date(f); d0.setDate(1);
       let k = 0;
       for (let d = new Date(d0); d.getTime() <= t; d.setMonth(d.getMonth() + 1), k++) {
         const xm = x(Math.max(f, d.getTime()));
-        S("line", { x1: xm, x2: xm, y1: top - 4, y2: h - bot, class: every === 1 || d.getMonth() % 3 === 0 ? "gl" : null }, svg);
-        if (every === 1 || d.getMonth() % 3 === 0) {
+        S("line", { x1: xm, x2: xm, y1: top - 4, y2: h - bot, class: every === 1 || d.getMonth() % every === 0 ? "gl" : null }, svg);
+        if (every === 1 || d.getMonth() % every === 0) {
           const nx = new Date(d); nx.setMonth(nx.getMonth() + every);
           const mid = x((Math.max(f, d.getTime()) + Math.min(t, nx.getTime())) / 2);
-          const lab = every === 1 ? MON[d.getMonth()] + (d.getMonth() === 0 || k === 0 ? " " + String(d.getFullYear()).slice(2) : "") : "Q" + (Math.floor(d.getMonth() / 3) + 1) + " " + String(d.getFullYear()).slice(2);
+          const lab = every === 12 ? String(d.getFullYear()) : every === 1 ? MON[d.getMonth()] + (d.getMonth() === 0 || k === 0 ? " " + String(d.getFullYear()).slice(2) : "") : "Q" + (Math.floor(d.getMonth() / 3) + 1) + " " + String(d.getFullYear()).slice(2);
           T(svg, mid, top - 8, lab, "tx", "middle");
         }
       }
@@ -365,8 +411,9 @@
           const a = x(D(tk.start)), b = x(D(tk.end));
           S("rect", { x: a, y: yc - bh / 2, width: Math.max(3, b - a), height: bh, rx: 3, style: "fill:" + col[tk.state || "todo"] + (tk.state === "todo" || !tk.state ? ";stroke:var(--ghost)" : "") }, g);
           if (tk.label) {
-            const lw = tw(svg, tk.label, "tv"), left = a - 6 - lw >= 0;
-            T(g, left ? a - 6 : b + 6, yc + fs / 3, tk.label, "tv", left ? "end" : "start", tk.state === "late" ? "fill:var(--bad)" : null);
+            // label left of the bar, else right of it, else nowhere (the tooltip has it); never over the names
+            const lw = tw(svg, tk.label, "tv"), left = a - 6 - lw >= 0, right = b + 6 + lw <= w - nameW - 4;
+            if (left || right) T(g, left ? a - 6 : b + 6, yc + fs / 3, tk.label, "tv", left ? "end" : "start", tk.state === "late" ? "fill:var(--bad)" : null);
           }
         }
         const ds = s => s ? s.split("-").reverse().join(".") : "–";

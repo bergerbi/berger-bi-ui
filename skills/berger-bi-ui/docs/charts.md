@@ -2,6 +2,12 @@
 
 Draw into `<div class="chart" id="x"></div>`, placed inside a `.card`. The chart fills the card, redraws on resize, and uses `--fs-s` for text, so CEO mode scales it too.
 
+**Card text (Datawrapper, ONS, FT):**
+- `h3` states the finding, for example "ספטמבר נמוך ב-22% מהיעד", not "הכנסות לפי חודש".
+- `.sub` gives the measure, unit and period, for example "₪ · ינו–אוק 2026".
+- `.one` is optional, with the why or the next step in one line.
+- The unit is repeated in the tooltip.
+
 Every call can take these options:
 | Option | What it does |
 |---|---|
@@ -14,10 +20,10 @@ Every chart shows a tooltip with a comparison, dims the other marks on hover, an
 
 | Chart | Call | Notes |
 |---|---|---|
-| Columns vs target | `BBI.columns(el,{labels,values,target,threshold:.9,emphasis:'last',partialLast})` | `target` is a number or an array. The target is drawn as a dark tick. A value below target × threshold is red. `emphasis`: `'last'` (default; the rest are light), `'all'`, or `highlight:[i]`. `partialLast` hatches a month that isn't closed yet. |
+| Columns vs target | `BBI.columns(el,{labels,values,target,threshold:.9,emphasis:'last',partialLast})` | `target` is a number or an array. The target is drawn as a dark tick. A value below target × threshold is red. `emphasis`: `'last'` (default; the rest are light), `'all'`, or `highlight:[i]`. When the insight talks about a specific month, pass `highlight:[i]` for that month. `partialLast` hatches a month that isn't closed yet. |
 | Trend + forecast | `BBI.line(el,{labels,values,forecast:{labels,values,lo,hi}})` | The forecast is dashed, with a band and a "today" line. The crosshair tooltip shows the change from the previous point. |
-| This year vs last | `BBI.compare(el,{labels,cur,prev,curName,prevName,threshold:.95})` | Last year is grey. A drop below `threshold` is red. Draws a small key with the 2 series. |
-| Ranking | `BBI.ranking(el,{items:[{name,v,exception}],top:2})` | Names on the right. The top N are dark. Extra rows fold into "אחרים (n)". |
+| This year vs last | `BBI.compare(el,{labels,cur,prev,curName,prevName,threshold:.95,partialLast})` | Last year is grey. A drop below `threshold` is red. Draws a small key with the 2 series. `partialLast` marks an open quarter as hatched and "חלקי", never red. |
+| Ranking | `BBI.ranking(el,{items:[{name,v,exception}],top:2})` | Names on the right. The top N are dark (keep 2 even for a "top 5" list, so only the leaders stand out). Extra rows fold into "אחרים (n)". |
 | Bridge | `BBI.waterfall(el,{steps:[{name,v,total}],good:'up'})` | Totals are dark, increases green, decreases red. With `good:'down'` (for costs) the colors swap. |
 | Change by group | `BBI.diverging(el,{items:[{name,v}],good:'up'})` | Plus or minus around 0. Bad is red, good is green. |
 | Gantt | `BBI.gantt(el,{from,to,today,tasks:[{name,start,end,state,label}]})` | Dates are `'YYYY-MM-DD'`. `state` is one of done, active, late (red), todo, or milestone. Months switch to quarters when the range is long. Rows that don't fit show "+n שורות". |

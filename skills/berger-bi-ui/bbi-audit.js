@@ -46,14 +46,21 @@
     document.querySelectorAll(".mn,.card").forEach(el => { if (el.scrollHeight > el.clientHeight + 2) add("content clipped", name(el), el.scrollHeight + " > " + el.clientHeight); });
 
     document.querySelectorAll(".bbi-chart svg").forEach(svg => {
-      const ts = [...svg.querySelectorAll("text")].filter(t => t.textContent.trim() && t.getAttribute("x") !== "-9999").map(t => t.getBoundingClientRect());
+      const els = [...svg.querySelectorAll("text")].filter(t => t.textContent.trim() && t.getAttribute("x") !== "-9999");
+      const ts = els.map(t => t.getBoundingClientRect());
       for (let i = 0; i < ts.length; i++) for (let j = i + 1; j < ts.length; j++) {
         const a = ts[i], b = ts[j];
-        if (a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1) { add("chart labels overlap", svg.getAttribute("aria-label") || "chart", ""); i = ts.length; break; }
+        if (a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1) { add("chart labels overlap", svg.getAttribute("aria-label") || "chart", `"${els[i].textContent}" / "${els[j].textContent}"`); i = ts.length; break; }
       }
     });
+    // an empty page must not pass: a screen must be visible and every visible chart drawn
+    const views = [...document.querySelectorAll("[data-screen-view]")];
+    if (views.length && !views.some(v => !v.hidden && visible(v))) add("no screen visible", "data-screen-view", "check the URL hash");
+    document.querySelectorAll(".chart").forEach(c => { if (visible(c) && !c.querySelector("svg")) add("chart not drawn", c.id || "chart", "no BBI.* call for this element?"); });
+    if (!document.querySelector(".bbi-chart svg") && document.querySelector(".chart")) add("no charts drawn", "page", "");
     console.table(out);
     return out;
   };
-  if (location.hash.includes("audit")) addEventListener("load", () => setTimeout(() => window.BBIaudit(), 300));
+  // run with ?audit (or #audit) in the URL. Check-only: do not ship this file to clients.
+  if (/[?&#]audit/.test(location.search + location.hash)) addEventListener("load", () => setTimeout(() => window.BBIaudit(), 500));
 })();

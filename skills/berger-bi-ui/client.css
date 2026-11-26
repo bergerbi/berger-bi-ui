@@ -1,0 +1,6 @@
+/* Client colors. The ONLY file you edit per client.
+   Fill it with the line printed by:  python -I logo_palette.py <logo>
+   No logo? Leave it as is (Berger defaults from tokens.css). */
+:root{
+  /* --ramp-9:#0B3A5C; --ramp-7:#17537F; --ramp-5:#3F78A6; --ramp-3:#6A93BA; --ramp-2:#CFE0EE; --ramp-1:#E6EFF7; --ramp-0:#F2F7FB; */
+}

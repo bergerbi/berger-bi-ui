@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>שפת Berger BI</title>
+<meta name="description" content="השפה החזותית והפונקציונלית של דשבורדים ומוצרי BI של Berger BI: שלד מסך, ספריית גרפים, צבע מהלוגו, ניהול ובדיקות.">
+<meta property="og:title" content="שפת Berger BI">
+<meta property="og:description" content="סקיל ל-Claude, ערכת עיצוב וספריית גרפים לדשבורדים בעברית.">
+<meta property="og:image" content="https://bergerbi.github.io/berger-bi-ui/docs/img/hero.png">
+<meta property="og:url" content="https://bergerbi.github.io/berger-bi-ui/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2317537F'/%3E%3Crect x='7' y='16' width='4' height='9' rx='1' fill='%23fff'/%3E%3Crect x='14' y='11' width='4' height='14' rx='1' fill='%23fff'/%3E%3Crect x='21' y='7' width='4' height='18' rx='1' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style id="bbi-tokens">
@@ -296,7 +303,7 @@ html{scroll-padding-top:70px}
 <body>
 <div class="doc">
 
-<aside class="side"><div class="brand">שפת Berger BI</div><div class="ver">גרסה 1.1 · 26.11.2026</div><a class="l1" href="#pa">א. השלד הקבוע</a><a class="l1" href="#pb">ב. החלטות</a><a class="l2" href="#b1">ניווט</a><a class="l2" href="#d2">3 גדלי פונט</a><a class="l2" href="#d3">צבעים</a><a class="l2" href="#b4">כרטיס KPI</a><a class="l2" href="#b5">פילטר תקופה</a><a class="l2" href="#b6">שמירת פילטרים</a><a class="l2" href="#b7">מובייל</a><a class="l2" href="#b8">מצב כהה</a><a class="l1" href="#pc">ג. ספריית רכיבים</a><a class="l2" href="#c1">סוגי גרפים</a><a class="l2" href="#c2">טבלה</a><a class="l2" href="#c3">מצבים</a><a class="l2" href="#c4">רכיבים קטנים</a><a class="l2" href="#c5">סוגי תובנות</a><a class="l2" href="#c6">השוואה וכיוון טוב</a><a class="l1" href="#pd">ד. ניהול וכניסה</a><a class="l2" href="#pd1">משתמשים, הרשאות, לוג</a><a class="l2" href="#pd2">כניסה ושער דמו</a><a class="l1" href="#pe">ה. צבע מהלוגו</a><a class="l1" href="#pf">ו. פונקציונליות</a><a class="l2" href="#f1">שאלו את הנתונים</a><a class="l2" href="#f2">התראות</a><a class="l2" href="#f3">תצוגות ושיתוף</a><a class="l2" href="#f4">ייצוא</a><a class="l2" href="#f5">הגדרת מדד</a><a class="l2" href="#f6">סינון מתוך גרף</a><a class="l2" href="#f7">סיור מודרך</a><a class="l2" href="#f8">יעדים וספים</a><a class="l2" href="#f9">פורמט וניסוח</a></aside>
+<aside class="side"><div class="brand">שפת Berger BI</div><div class="ver">עודכן 26.11.2026 · <a href="https://github.com/bergerbi/berger-bi-ui" style="display:inline;padding:0;border:0">GitHub</a></div><a class="l1" href="#pa">א. השלד הקבוע</a><a class="l1" href="#pb">ב. החלטות</a><a class="l2" href="#b1">ניווט</a><a class="l2" href="#d2">3 גדלי פונט</a><a class="l2" href="#d3">צבעים</a><a class="l2" href="#b4">כרטיס KPI</a><a class="l2" href="#b5">פילטר תקופה</a><a class="l2" href="#b6">שמירת פילטרים</a><a class="l2" href="#b7">מובייל</a><a class="l2" href="#b8">מצב כהה</a><a class="l1" href="#pc">ג. ספריית רכיבים</a><a class="l2" href="#c1">סוגי גרפים</a><a class="l2" href="#c2">טבלה</a><a class="l2" href="#c3">מצבים</a><a class="l2" href="#c4">רכיבים קטנים</a><a class="l2" href="#c5">סוגי תובנות</a><a class="l2" href="#c6">השוואה וכיוון טוב</a><a class="l1" href="#pd">ד. ניהול וכניסה</a><a class="l2" href="#pd1">משתמשים, הרשאות, לוג</a><a class="l2" href="#pd2">כניסה ושער דמו</a><a class="l1" href="#pe">ה. צבע מהלוגו</a><a class="l1" href="#pf">ו. פונקציונליות</a><a class="l2" href="#f1">שאלו את הנתונים</a><a class="l2" href="#f2">התראות</a><a class="l2" href="#f3">תצוגות ושיתוף</a><a class="l2" href="#f4">ייצוא</a><a class="l2" href="#f5">הגדרת מדד</a><a class="l2" href="#f6">סינון מתוך גרף</a><a class="l2" href="#f7">סיור מודרך</a><a class="l2" href="#f8">יעדים וספים</a><a class="l2" href="#f9">פורמט וניסוח</a></aside>
 <div class="body">
 <div class="topbar"><h1>שפת Berger BI: הרפרנס הוויזואלי</h1><span class="sp"></span>
   <button class="dl main" onclick="dl('f-skill','SKILL.md')"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>הורדת SKILL.md</button>
@@ -305,7 +312,7 @@ html{scroll-padding-top:70px}
 </div>
 <div id="flash" class="toast-x" hidden style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:300"></div>
 <div id="cpBox" hidden style="position:fixed;inset:10% 10%;z-index:300;background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between"><span>העתיקו את הטקסט ושמרו בקובץ <b></b></span><button class="dl" onclick="this.closest('#cpBox').hidden=true">סגירה</button></div><textarea readonly style="flex:1;font:12px Consolas,monospace;direction:ltr"></textarea></div>
-<p class="intro">כל מה שכתוב בסקיל מוצג כאן בעין. מספרים בעמוד הם דוגמה בלבד. המקור והיסטוריית השינויים: <a href="https://github.com/bergerbi/berger-bi-ui" target="_blank" rel="noopener">github.com/bergerbi/berger-bi-ui</a> (פרטי, לצוות).</p>
+<p class="intro">כל מה שכתוב בסקיל מוצג כאן בעין. מספרים בעמוד הם דוגמה בלבד. המקור והיסטוריית השינויים: <a href="https://github.com/bergerbi/berger-bi-ui" target="_blank" rel="noopener">github.com/bergerbi/berger-bi-ui</a> (ציבורי).</p>
 
 <!-- ======================= PART A: SHELL ======================= -->
 <h2 class="sec-t" id="pa">חלק א: השלד הקבוע</h2>
@@ -392,7 +399,7 @@ html{scroll-padding-top:70px}
     </div>
     <div class="grid">
       <div class="card lead">
-        <svg class="ico cx" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><h3>הכנסות לפי חודש מול יעד</h3><span class="sub">₪ · עמודה = בפועל, קו אפור = יעד</span>
+        <svg class="ico cx" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><h3>הכנסות לפי חודש מול יעד</h3><span class="sub">₪ · עמודה = בפועל, קו כהה = יעד</span>
         <div class="chart" id="s-lead"></div>
         <div class="one"><b>ספטמבר נמוך ב-<span class="n">22%</span> מהיעד.</b> הפער מגיע מאזור הצפון, ואוקטובר חזר ליעד.</div>
       </div>
@@ -601,7 +608,7 @@ html{scroll-padding-top:70px}
 <h3 class="sub-t" id="c1">ג1. סוגי גרפים</h3>
 <div class="gallery">
   <div class="card gc">
-    <h3>עמודות מול יעד</h3><span class="sub">אלפי ₪ · עמודה = בפועל, רקע אפור = יעד</span>
+    <h3>עמודות מול יעד</h3><span class="sub">אלפי ₪ · עמודה = בפועל, קו כהה = יעד</span>
     <div class="chart" id="g-cols"></div>
     <div class="one"><b>יוני חרג מהיעד.</b> שאר החודשים קרובים ליעד.</div>
     <div class="rule">כלל: היעד הוא קו כהה, מתחת ליעד באדום, החודש האחרון בצבע מלא והשאר בבהיר.</div>
