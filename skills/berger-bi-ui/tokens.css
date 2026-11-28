@@ -27,25 +27,26 @@
   --ghost:#CBD2D8; --line:#E3E7EB; --grid:#EEF0F2;
   --bg:#F4F6F8; --surface:#FFFFFF; --hover:#F1F6FA;
   --demo-bg:#FFF3C4; --demo-ink:#6B5000; --demo-line:#EED77E;
+  --hd-bg:var(--ramp-9); --on-hd:#FFFFFF; --on-hd-2:rgba(255,255,255,.72); --hd-hi:rgba(255,255,255,.16);   /* detached top bar */
   --pop-bg:#1D2125; --pop-text:#E8ECF0; --pop-good:#7ED6A5; --pop-bad:#FF9B8F;   /* tooltip, toast (dark box) */
 
-  /* ---- TYPE: 3 text sizes + one number size. Nothing else. ---- */
-  --fs-s:12px; --fs-m:13px; --fs-l:19px; --fs-kpi:28px;
+  /* ---- TYPE: 3 text sizes + one number size. Nothing else. (v1.4: one step up, after Moris) ---- */
+  --fs-s:13px; --fs-m:15px; --fs-l:20px; --fs-kpi:30px;
   --f-ui:"Heebo","Segoe UI",Arial,sans-serif;
   --f-body:var(--f-ui);   /* one font: Heebo has tabular digits by default; Assistant has none (measured) */
 
   /* ---- SHAPE / DEPTH / MOTION ---- */
-  --r-card:10px; --r-ctl:8px; --r-chip:6px; --r-bar:3px;
+  --r-card:14px; --r-ctl:10px; --r-chip:8px; --r-bar:3px; --r-hd:18px;
   --pad:18px; --gap:14px;
-  --hd-h:52px; --ft-h:34px; --panel-w:264px; --rail-w:44px; --side-w:220px;
+  --hd-h:68px; --ft-h:32px; --panel-w:280px; --rail-w:44px; --side-w:220px;
   --sh-pop:0 1px 2px rgba(0,0,0,.05);     /* the only shadow: open menus/popovers */
   --z-menu:20; --z-drawer:25; --z-sheet:30; --z-tip:35; --z-toast:40; --z-modal:50;
   --ease:cubic-bezier(.2,.7,.3,1); --t:.2s;
 }
 /* CEO mode: put .ceo on <html>. Sizes are redeclared here so they really change. */
-.ceo{--fs-s:15.5px; --fs-m:17px; --fs-l:25px; --fs-kpi:36px; --panel-w:320px; --hd-h:60px}
-@media (min-width:1700px){:root:not(.ceo){--fs-s:12.5px; --fs-m:14px; --fs-l:20px; --fs-kpi:30px; --panel-w:300px; --pad:20px; --gap:16px}}
-@media (max-height:860px){:root:not(.ceo){--hd-h:48px; --gap:12px}}
+.ceo{--fs-s:16px; --fs-m:18px; --fs-l:26px; --fs-kpi:38px; --panel-w:330px; --hd-h:74px}
+@media (min-width:1700px){:root:not(.ceo){--fs-s:13.5px; --fs-m:15.5px; --fs-l:21px; --fs-kpi:32px; --panel-w:300px; --pad:20px; --gap:16px}}
+@media (max-height:860px){:root:not(.ceo){--hd-h:62px; --gap:12px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
 /* dark mode: products only. <html data-theme="dark">, toggled from the user menu */
@@ -57,6 +58,7 @@
   --good:#5BBE8A; --bad:#E57A6E; --good-mark:#4FAE7C; --bad-mark:#E0675A; --bad-xl:#3A1F1C;
   --on-brand:#0F1318; --on-strong:#0F1318;
   --demo-bg:#3A3210; --demo-ink:#F3DD8A; --demo-line:#5E5220;
+  --hd-bg:color-mix(in srgb,var(--ramp-9) 55%,#0F1318); --on-hd:#E8ECF0; --on-hd-2:rgba(232,236,240,.7); --hd-hi:rgba(232,236,240,.14);
   --pop-bg:#E8ECF0; --pop-text:#1D2125; --pop-good:#1F7A4D; --pop-bad:#B4372B;
 }
 
@@ -78,22 +80,26 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* more than 7 screens: screens move to a right sidebar (.sn), first column = right in RTL */
 .app.nav-side{grid-template-columns:var(--side-w) var(--panel-w) 1fr;grid-template-areas:"hd hd hd" "sn rp mn" "ft ft ft"}
 .app.nav-side.col{grid-template-columns:var(--side-w) var(--rail-w) 1fr}
-.hd{grid-area:hd;position:relative;display:flex;align-items:center;gap:22px;padding:0 var(--pad);background:var(--surface);border-bottom:1px solid var(--line)}
+/* top bar: detached, rounded, dark (client ramp-9). Tabs are pills. */
+.hd{grid-area:hd;position:relative;display:flex;align-items:center;gap:18px;margin:10px 12px 0;padding:0 var(--pad);background:var(--hd-bg);color:var(--on-hd);border-radius:var(--r-hd)}
 .sn{grid-area:sn;background:var(--surface);border-inline-end:1px solid var(--line);padding:10px 8px;overflow:auto}
 .sn .grp{font:500 var(--fs-s) var(--f-ui);color:var(--text-3);padding:10px 10px 4px}
 .sn a{display:block;padding:7px 10px;border-radius:var(--r-ctl);font-family:var(--f-ui);color:var(--text-2);text-decoration:none;cursor:pointer}
 .sn a.on{background:var(--data-xl);color:var(--ink);font-weight:600}
-.hd .client{display:flex;align-items:center;gap:10px;font-family:var(--f-ui);font-weight:600;color:var(--ink)}
+.hd .client{display:flex;align-items:center;gap:10px;font-family:var(--f-ui);font-weight:600;color:var(--on-hd)}
+.hd .client small{display:block;font-weight:400;font-size:var(--fs-s);color:var(--on-hd-2)}
 .hd .client img{height:28px}
-.tabs{display:flex;height:100%;gap:2px}
-.tabs a{display:flex;align-items:center;padding:0 13px;font-family:var(--f-ui);font-size:var(--fs-m);color:var(--text-2);text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer}
-.tabs a.on{color:var(--ink);font-weight:600;border-bottom-color:var(--brand)}
+.tabs{display:flex;gap:4px}
+.tabs a{display:flex;align-items:center;padding:7px 13px;border-radius:var(--r-ctl);font-family:var(--f-ui);font-size:var(--fs-m);color:var(--on-hd-2);text-decoration:none;cursor:pointer;white-space:nowrap}
+.tabs a.on{color:var(--on-hd);font-weight:600;background:var(--hd-hi)}
+.hd-meta{display:flex;gap:16px;font-size:var(--fs-s);color:var(--on-hd-2);white-space:nowrap} .hd-meta b{font-weight:500;color:var(--on-hd)}
 .hd-end{margin-inline-start:auto;display:flex;align-items:center;gap:10px}
-.search{display:flex;align-items:center;gap:8px;width:210px;height:32px;padding:0 10px;border:1px solid var(--line);border-radius:var(--r-ctl);color:var(--text-3);font-size:var(--fs-s)}
-.search kbd{margin-inline-start:auto;font:var(--fs-s) var(--f-ui);border:1px solid var(--line);border-radius:4px;padding:0 4px}
-.bell{position:relative;width:32px;height:32px;display:grid;place-items:center;background:transparent;border:1px solid var(--line);border-radius:var(--r-ctl);color:var(--text-2);cursor:pointer}
-.cnt{position:absolute;top:-6px;inset-inline-end:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:4px;background:var(--strong);color:var(--on-strong);font:600 var(--fs-s)/18px var(--f-ui);text-align:center}
-.um{display:flex;align-items:center;gap:8px;padding:4px 8px;background:transparent;border:1px solid var(--line);border-radius:var(--r-ctl);font-family:var(--f-ui);font-size:var(--fs-s);color:var(--ink);cursor:pointer}
+.search{display:flex;align-items:center;gap:8px;width:220px;height:34px;padding:0 10px;background:var(--hd-hi);border-radius:var(--r-ctl);color:var(--on-hd-2);font-size:var(--fs-s)}
+.search kbd{margin-inline-start:auto;font:var(--fs-s) var(--f-ui);border:1px solid var(--on-hd-2);border-radius:4px;padding:0 4px}
+.bell{position:relative;width:34px;height:34px;display:grid;place-items:center;background:transparent;border:1px solid var(--hd-hi);border-radius:var(--r-ctl);color:var(--on-hd);cursor:pointer}
+.cnt{position:absolute;top:-6px;inset-inline-end:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:4px;background:var(--bad);color:var(--surface);font:600 var(--fs-s)/18px var(--f-ui);text-align:center}
+.um{display:flex;align-items:center;gap:8px;padding:4px 8px;background:transparent;border:1px solid var(--hd-hi);border-radius:var(--r-ctl);font-family:var(--f-ui);font-size:var(--fs-s);color:var(--on-hd);cursor:pointer}
+.hd .av{background:var(--on-hd);color:var(--hd-bg)}
 .av{width:24px;height:24px;border-radius:50%;background:var(--strong);color:var(--on-strong);display:grid;place-items:center;font-size:var(--fs-s);font-weight:600}
 .menu{position:absolute;inset-inline-end:var(--pad);top:calc(100% - 2px);z-index:var(--z-menu);width:228px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh-pop);padding:6px;font-family:var(--f-ui)}
 .menu .grp{font-size:var(--fs-s);color:var(--text-3);padding:8px 10px 2px}
@@ -102,11 +108,11 @@ button,input,select,textarea{font:inherit;color:inherit}
 .menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
 
 /* right panel: period -> filters -> insights (only the insights list may scroll) */
-.rp{grid-area:rp;position:relative;background:var(--surface);border-inline-end:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
-.rp-sec{padding:14px 16px;border-bottom:1px solid var(--line)}
+.rp{grid-area:rp;position:relative;background:transparent;display:flex;flex-direction:column;overflow:hidden}
+.rp-sec{padding:12px 14px 6px}
 .rp-sec.grow{flex:1;overflow:auto;border-bottom:0}
 .rp-t{display:flex;justify-content:space-between;align-items:center;font-family:var(--f-ui);font-size:var(--fs-m);font-weight:600;color:var(--ink);margin-bottom:9px}
-.coll{position:absolute;top:12px;inset-inline-end:10px;width:24px;height:24px;border:1px solid var(--line);border-radius:6px;background:var(--surface);display:grid;place-items:center;color:var(--text-2);cursor:pointer;padding:0}
+.coll{position:absolute;top:10px;inset-inline-end:10px;width:24px;height:24px;border:1px solid var(--line);border-radius:6px;background:var(--surface);display:grid;place-items:center;color:var(--text-2);cursor:pointer;padding:0}
 .rail{display:none;flex-direction:column;align-items:center;gap:10px;padding:10px 0}
 .rail button{all:unset;cursor:pointer;position:relative;width:30px;height:30px;display:grid;place-items:center;border-radius:6px;color:var(--text-2)}
 .app.col .rp-sec,.app.col .coll{display:none}
@@ -116,9 +122,16 @@ button,input,select,textarea{font:inherit;color:inherit}
 .fg{margin-top:10px} .fg label{display:block;font-size:var(--fs-s);color:var(--text-2);margin-bottom:5px}
 .chips{display:flex;flex-wrap:wrap;gap:5px}
 .chip{padding:3px 9px;border:1px solid var(--line);border-radius:var(--r-chip);font-size:var(--fs-s);color:var(--text-2);background:var(--surface);cursor:pointer}
-.chip.on{border-color:var(--data);color:var(--ink);background:var(--data-xl)}
+.chip.on{border-color:var(--strong);color:var(--on-strong);background:var(--strong)}
+/* segmented choice: period, compare-to, granularity, series. One is always on. */
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-ctl);padding:2px;gap:2px}
+.seg button{flex:1;border:0;background:none;padding:5px 8px;border-radius:8px;font-size:var(--fs-s);color:var(--text-2);cursor:pointer;white-space:nowrap}
+.seg button.on{background:var(--strong);color:var(--on-strong);font-weight:500}
+.seg+.seg{margin-top:6px}
 
 /* inputs: one look, four states */
+button.sel{width:100%;cursor:pointer;font-size:var(--fs-s)}
+button.sel::after{content:"";width:6px;height:6px;border:solid var(--text-3);border-width:0 1.5px 1.5px 0;transform:rotate(45deg) translateY(-2px)}
 .inp,.sel{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:32px;padding:5px 10px;border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--surface);font-size:var(--fs-m);color:var(--text)}
 .inp:focus-within,.sel:focus-within{border-color:var(--brand);outline:2px solid var(--data-xl)}
 .inp.err,.sel.err{border-color:var(--bad)}
@@ -153,9 +166,12 @@ button,input,select,textarea{font:inherit;color:inherit}
 .kpi.lead .kpi-l{color:var(--ink);font-weight:600}
 .kpi-v{font-family:var(--f-ui);font-size:var(--fs-kpi);font-weight:600;color:var(--ink);letter-spacing:-.5px;line-height:1.15;font-variant-numeric:tabular-nums lining-nums}
 .kpi-c{font-size:var(--fs-s);color:var(--text-3);display:flex;gap:8px;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-n{font-size:var(--fs-s);color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}   /* a definition instead of a change line */
 .tbar{height:4px;background:var(--grid);border-radius:2px;margin-top:6px;overflow:hidden}
 .tbar i{display:block;height:100%;background:var(--data);border-radius:2px}
 
+/* a screen with its own KPI band: <div class="view" data-screen-view="x"> kband + grid </div> */
+.view{flex:1;display:flex;flex-direction:column;gap:12px;min-height:0}
 /* visual grid: 6 visuals, the lead takes 2x2 cells */
 .grid{flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr);gap:12px;min-height:0}
 .grid>.lead{grid-column:span 2;grid-row:span 2}
@@ -165,7 +181,14 @@ button,input,select,textarea{font:inherit;color:inherit}
 .card .sub{font-size:var(--fs-s);color:var(--text-3)}
 .card .one{margin-top:6px;padding-top:7px;border-top:1px solid var(--grid);font-size:var(--fs-s);color:var(--text)}
 .card .one b{color:var(--ink);font-weight:600}
-/* charts: draw with bbi-charts.js into <div class="chart">. Text stays 12px at any size. */
+/* how it was counted: one muted line at the card bottom (open month, small base, holidays, what is excluded) */
+.card .note{margin-top:6px;padding-top:6px;border-top:1px solid var(--grid);font-size:var(--fs-s);color:var(--text-3);line-height:1.4}
+.card .note b{color:var(--text);font-weight:500}
+.card .tools{position:absolute;top:10px;inset-inline-end:14px;display:flex;gap:6px}
+.card .tools .seg button{padding:3px 9px}
+.card .chips{margin-top:6px}
+.more{margin-top:6px;font-size:var(--fs-s);color:var(--brand);cursor:pointer}
+/* charts: draw with bbi-charts.js into <div class="chart">. Text stays --fs-s at any size. */
 .chart{flex:1;min-height:0;margin-top:8px;position:relative;font-size:var(--fs-s)}
 .bbi-chart .tx{font-family:var(--f-ui);fill:var(--text-3)}
 .bbi-chart .tv{font-family:var(--f-ui);font-weight:600;fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round}
@@ -173,6 +196,21 @@ button,input,select,textarea{font:inherit;color:inherit}
 .bbi-chart [data-i]{transition:opacity .15s}
 .tip b{display:block;font-family:var(--f-ui);margin-bottom:4px}
 
+/* "needs attention" strip (overview, above the KPI band): the top exception + a ranked list with amounts */
+.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);flex:none;overflow:hidden}
+.h-main{padding:10px 18px;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:18px;align-items:center}
+.h-kind{grid-column:1/-1;font-size:var(--fs-s);font-weight:600;color:var(--bad);display:flex;align-items:center;gap:6px}
+.h-kind::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--bad-mark)}
+.hero h2{margin:1px 0 0;font-size:var(--fs-m);font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-num{grid-row:2/4;grid-column:2;font-size:var(--fs-kpi);font-weight:600;color:var(--bad);letter-spacing:-.5px}
+.h-num.up{color:var(--good)}
+.hero p{margin:0;color:var(--text-2);font-size:var(--fs-s);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-list{list-style:none;margin:0;padding:5px 0;border-inline-start:1px solid var(--line);display:flex;flex-direction:column;justify-content:center}
+.h-list li{display:flex;justify-content:space-between;gap:10px;padding:2px 16px;font-size:var(--fs-s);color:var(--text);cursor:pointer}
+.h-list li span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-list li.on{background:var(--bad-xl);color:var(--ink);font-weight:600}
+.h-list b{font-weight:600;flex:none;white-space:nowrap}
+.h-list .n,.kpi-v .n,.hero .n{display:inline}   /* inline-block numbers would let the unit word wrap away */
 /* insights: the kind is a word, not a colored stripe */
 .ins{padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-ctl);margin-bottom:8px;background:var(--surface)}
 .ins .kind{display:block;font-family:var(--f-ui);font-size:var(--fs-s);font-weight:600;margin-bottom:3px;color:var(--text-2)}
@@ -183,7 +221,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .ins .show{display:inline-block;margin-top:6px;font-size:var(--fs-s);color:var(--brand);cursor:pointer}
 
 /* footer: Berger BI + data freshness */
-.ft{grid-area:ft;display:flex;align-items:center;gap:16px;padding-block:0;padding-inline:var(--pad) 76px;background:var(--surface);border-top:1px solid var(--line);font-size:var(--fs-s);color:var(--text-3)}
+.ft{grid-area:ft;display:flex;align-items:center;gap:16px;padding-block:0;padding-inline:var(--pad) 76px;background:transparent;font-size:var(--fs-s);color:var(--text-3)}
 .ft .by{display:flex;align-items:center;gap:7px} .ft .by img{height:16px}
 /* ask the data: floating round button bottom-left, opens .ask-panel */
 .ask-fab{position:fixed;bottom:max(4px,calc((var(--ft-h) - 44px) / 2));inset-inline-end:16px;z-index:var(--z-drawer);width:44px;height:44px;border-radius:50%;border:0;background:var(--brand);color:var(--on-brand);display:grid;place-items:center;cursor:pointer;box-shadow:var(--sh-pop)}
@@ -197,9 +235,15 @@ button,input,select,textarea{font:inherit;color:inherit}
 .btn2{border:1px solid var(--line);color:var(--text);background:var(--surface)}
 .lnk{color:var(--brand);font-family:var(--f-ui);font-size:var(--fs-s);cursor:pointer}
 .pop{position:absolute;z-index:var(--z-menu);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh-pop);padding:6px}
-.dt{width:100%;border-collapse:collapse;font-size:var(--fs-m)}
-.dt th{font-family:var(--f-ui);font-weight:500;font-size:var(--fs-s);color:var(--text-3);text-align:start;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer}
-.dt td{padding:6px 8px;border-bottom:1px solid var(--grid)}
+/* work tables: wrap in .dtw so only the table scrolls; sticky head; th.s = sortable, th.sd = sorted (desc) */
+.dtw{flex:1;min-height:0;overflow:auto;margin-top:6px}
+.dt{width:100%;border-collapse:collapse;font-size:var(--fs-s)}
+.dt th{position:sticky;top:0;background:var(--surface);font-family:var(--f-ui);font-weight:500;font-size:var(--fs-s);color:var(--text-3);text-align:start;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer}
+.dt th.s::after{content:" ↕";color:var(--ghost)} .dt th.sd::after{content:" ▼"}
+.dt td{padding:5px 8px;border-bottom:1px solid var(--grid);white-space:nowrap}
+.dt td:first-child{max-width:0;width:100%;overflow:hidden;text-overflow:ellipsis}
+.dt td b{font-weight:600;color:var(--ink)} .dt td small{display:block;font-size:var(--fs-s);color:var(--text-3)}
+.dt .st{font-weight:600;color:var(--bad)}   /* status = a colored word, not a pill */
 .dt td.num,.dt th.num{text-align:end}
 .dt tbody tr:hover{background:var(--hover)}
 .dt tr.hl{background:var(--bad-xl)}
@@ -236,11 +280,13 @@ button,input,select,textarea{font:inherit;color:inherit}
 .toast button{all:unset;cursor:pointer;color:var(--ramp-2);font-weight:600}
 .toast button:focus-visible{outline:2px solid var(--pop-text);outline-offset:2px}
 .tip .up{color:var(--pop-good)} .tip .dn,.tip .acc{color:var(--pop-bad)}
-[data-theme="dark"] .ft .by img{filter:brightness(0) invert(.85)}   /* Berger BI logo stays visible in dark mode */
+[data-theme="dark"] .ft .by img{filter:brightness(0) invert(.85)}
+.hd .fbtn{background:transparent;border-color:var(--hd-hi);color:var(--on-hd)}   /* Berger BI logo stays visible in dark mode */
 
 /* tablet 760-1199: panel becomes a bottom sheet opened by .fbtn; 2 chart columns */
 .fbtn,.sheet-bg{display:none}
 @media (max-width:1199px){
+  .hd-meta{display:none}
   .app,.app.nav-side{grid-template-columns:minmax(0,1fr);grid-template-areas:"hd" "mn" "ft"}
   .hd{gap:12px} .tabs{flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
   .sn{display:none}
@@ -253,10 +299,12 @@ button,input,select,textarea{font:inherit;color:inherit}
 }
 /* phone < 760: one column, the page may scroll (the only exception to "no scroll") */
 @media (max-width:759px){
+  .hero,.h-main{grid-template-columns:minmax(0,1fr)} .h-num{grid-row:auto;grid-column:auto} .h-list{border-inline-start:0;border-top:1px solid var(--line)}
+  .kpi-v{white-space:nowrap} .hd{margin:6px 6px 0}
   body{overflow:auto}
   .app{height:auto;min-height:100vh}
   .tabs,.kband{overflow-x:auto;scrollbar-width:none}
-  .kpi{min-width:140px}
+  .kpi{min-width:170px}
   .grid{grid-template-columns:minmax(0,1fr);overflow:visible}
   .um .nm,.hd .client .nm{display:none}
   .ctx{flex-wrap:wrap;gap:8px} .ctx p{flex-basis:100%;order:3;white-space:normal} .ctx .pa{margin-inline-start:auto}

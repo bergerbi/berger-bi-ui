@@ -1,7 +1,7 @@
 /* ============================================================================
    bbi-charts.js · Berger BI chart kit · no dependencies
    Draws at the element's real pixel size and redraws on resize. Chart text uses
-   --fs-s (12px, larger in CEO mode). Colors come from tokens.css. Every chart
+   --fs-s (13px, larger in CEO mode). Colors come from tokens.css. Every chart
    has real axes, a tooltip with comparison, hover dimming, optional onClick,
    and a collision pass so labels never sit on each other.
    API and options: docs/charts.md. Change the kit HERE (the shared repo), never
@@ -19,36 +19,46 @@
     if (p) p.appendChild(e);
     return e;
   }
+  /* Hebrew units in SVG: Chrome ignores LRI/PDI in SVG text, so use RLE + LRE embeddings (measured) */
+  const vis = s => { s = String(s); const m = s.match(/^\u2066([^\u2069]*)\u2069(.*)$/); return m ? "\u202B\u202A" + m[1] + "\u202C" + m[2] + "\u202C" : s; };
   function T(p, x, y, s, cls, anchor, style) {
     const t = S("text", { x, y, class: cls || "tx", "text-anchor": anchor || "start", style }, p);
-    t.textContent = s; return t;
+    t.textContent = vis(s); return t;
   }
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const num = v => typeof v === "number" && isFinite(v);
   const arr = (v, n) => Array.isArray(v) ? v : (v == null ? null : Array(n).fill(v));   // scalar target -> array
 
   /* number format: rounds first, then picks K / M / B; 3 significant digits */
-  function fmt(v, unit) {
+  function fmt(v, unit, compact) {          // compact: K / M even when BBI.he is on (tight labels)
     if (!num(v)) return "–";
     const a = Math.abs(v);
     if (unit === "%" || unit === "pp") {
       let r = a < 100 ? Math.round(a * 10) / 10 : Math.round(a);          // 3 significant digits: 31.4%, 4.2%, 112%
       if (r === 0) return unit === "%" ? "0%" : "0 נק׳";
-      return (v < 0 ? "−" : "") + r + (unit === "%" ? "%" : " נק׳");
+      const pc = (v < 0 ? "−" : "") + r + (unit === "%" ? "%" : "");
+      if (window.BBI && window.BBI.he && !compact) return "\u2066" + pc + "\u2069" + (unit === "%" ? "" : " נק׳");
+      return pc + (unit === "%" ? "" : " נק׳");
     }
     const sig = x => +x.toPrecision(3);
-    let s;
+    const he = !!(window.BBI && window.BBI.he) && !compact;                          // Hebrew units: ₪4.97 מיליון, ₪62 אלף
+    let s, word = "";
     if (a < 1000) s = String(Number.isInteger(a) ? a : sig(a));
     else {
-      const steps = [[1e12, "T"], [1e9, "B"], [1e6, "M"], [1e3, "K"]];
+      const steps = he ? [[1e12, " טריליון"], [1e9, " מיליארד"], [1e6, " מיליון"], [1e3, " אלף"]] : [[1e12, "T"], [1e9, "B"], [1e6, "M"], [1e3, "K"]];
       let i = steps.findIndex(([d]) => a >= d);
       let r = sig(a / steps[i][0]);
       if (r >= 1000 && i > 0) { i--; r = sig(a / steps[i][0]); }        // 999,600 -> 1M, not 1000K
-      s = r + steps[i][1];
+      if (he) { s = String(r); word = steps[i][1]; } else s = r + steps[i][1];
     }
     if (s === "0") return "0";
-    return (v < 0 ? "−" : "") + (unit === "₪" ? "₪" : "") + s + (unit && !["₪", "%", "pp"].includes(unit) ? " " + unit : "");
+    const core = (v < 0 ? "−" : "") + (unit === "₪" ? "₪" : "") + s;
+    const tail = unit && !["₪", "%", "pp"].includes(unit) ? " " + unit : "";
+    // he: number isolated LTR (LRI..PDI) then the word; HTML reads it right, SVG text goes through vis()
+    return he ? "\u2066" + core + "\u2069" + word + tail : core + tail;
   }
+  /* signed: "+" goes inside the number, also with Hebrew units */
+  const sfmt = (v, unit, compact) => { const f = fmt(v, unit, compact); return !(v > 0) ? f : f.includes("\u2066") ? f.replace("\u2066", "\u2066+") : "+" + f; };
   /* 4-6 nice ticks covering [min, max] */
   function nice(min, max, n) {
     if (!num(min) || !num(max)) { min = 0; max = 1; }
@@ -66,7 +76,7 @@
   let meas;
   function tw(svg, s, cls) {
     if (!meas || meas.ownerSVGElement !== svg) meas = S("text", { x: -9999, y: -9999, class: cls || "tx" }, svg);
-    meas.setAttribute("class", cls || "tx"); meas.textContent = s;
+    meas.setAttribute("class", cls || "tx"); meas.textContent = vis(s);
     return meas.getComputedTextLength();
   }
   function ellipsis(svg, s, max, cls) {
@@ -331,16 +341,17 @@
       const y = lin(ticks[0], ticks[ticks.length - 1], h - bot, top);
       const n = seg.length, bw = (w - L - R) / n, bar = Math.min(44, bw * .62), xc = i => L + bw * i + bw / 2;
       yAxis(svg, ticks, y, L, w - R, o.unit, o.yTitle, fs);
-            // value labels: drop the currency sign when labels would touch
-      const labOf = (d, cur) => (d.s.total ? "" : d.s.v > 0 ? "+" : "") + fmt(d.s.v, cur ? o.unit : (o.unit === "₪" ? null : o.unit));
-      const cur = seg.every(d => tw(svg, labOf(d, true), "tv") < bw - 4);
+      // value labels: drop the currency sign, then the Hebrew unit word, when labels would touch
+      const labOf = (d, cur, c) => { const u = cur ? o.unit : (o.unit === "₪" ? null : o.unit); return d.s.total ? fmt(d.s.v, u, c) : sfmt(d.s.v, u, c); };
+      const fits = (cur, c) => seg.every(d => tw(svg, labOf(d, cur, c), "tv") < bw - 4);
+      const cur = fits(true, false), cpt = !cur && !fits(false, false);
       seg.forEach((d, i) => {
         const neg = !d.s.total && d.s.v < 0, g = S("g", {}, svg);
         const bad = o.good === "down" ? !neg : neg;
         const fill = d.s.total ? "var(--strong)" : bad ? EXC : GOOD;
         S("rect", { x: xc(i) - bar / 2, y: y(Math.max(d.a, d.b)), width: bar, height: Math.max(1, Math.abs(y(d.a) - y(d.b))), rx: 3, style: "fill:" + fill }, g);
         if (i < n - 1) S("line", { x1: xc(i) + bar / 2, x2: xc(i + 1) - bar / 2, y1: y(d.b), y2: y(d.b), style: "stroke:var(--ghost);stroke-dasharray:2 2" }, svg);
-        T(g, xc(i), y(Math.max(d.a, d.b)) - 5, labOf(d, cur), "tv", "middle", fill === EXC ? "fill:var(--bad)" : null);
+        T(g, xc(i), y(Math.max(d.a, d.b)) - 5, labOf(d, cur, cpt), "tv", "middle", fill === EXC ? "fill:var(--bad)" : null);
         T(svg, xc(i), h - bot + fs + 4, ellipsis(svg, d.s.name, bw - 4), "tx", "middle");   // every step keeps its name
         bind(svg, g, i, d.s.name, () => [[d.s.total ? "סה״כ" : "שינוי", fmt(d.s.v, o.unit)]].concat(d.s.total ? [] : [["אחרי השלב", fmt(d.b, o.unit)]]), o, d.s);
       });
@@ -359,7 +370,7 @@
       }
       const n = it.length, unit = o.unit || "%";
       const nameW = Math.min(w * .35, Math.max(...it.map(d => tw(svg, d.name))) + 12);
-      const labW = Math.max(...it.map(d => tw(svg, (d.v > 0 ? "+" : "") + fmt(d.v, unit), "tv"))) + 8;
+      const labW = Math.max(...it.map(d => tw(svg, sfmt(d.v, unit), "tv"))) + 8;
       const m = Math.max(...it.map(d => Math.abs(d.v)), 1e-9);
       const x = lin(-m, m, labW, w - nameW - labW), rh = h / n, bh = Math.min(16, rh * .62);
       S("line", { x1: x(0), x2: x(0), y1: 0, y2: h, class: "ax" }, svg);
@@ -369,8 +380,8 @@
         const fill = d.v === 0 ? "var(--ghost)" : isBad ? EXC : GOOD;
         T(g, w - 2, yc + fs / 3, ellipsis(svg, d.name, nameW - 8), "tx", "end");
         S("rect", { x: a, y: yc - bh / 2, width: Math.max(1, wd), height: bh, rx: 3, style: "fill:" + fill }, g);
-        T(g, d.v >= 0 ? x(d.v) + 5 : x(d.v) - 5, yc + fs / 3, (d.v > 0 ? "+" : "") + fmt(d.v, unit), "tv", d.v >= 0 ? "start" : "end", fill === EXC ? "fill:var(--bad)" : null);
-        bind(svg, g, i, d.name, () => [["שינוי", (d.v > 0 ? "+" : "") + fmt(d.v, unit), isBad ? "dn" : "up"]], o, d);
+        T(g, d.v >= 0 ? x(d.v) + 5 : x(d.v) - 5, yc + fs / 3, sfmt(d.v, unit), "tv", d.v >= 0 ? "start" : "end", fill === EXC ? "fill:var(--bad)" : null);
+        bind(svg, g, i, d.name, () => [["שינוי", sfmt(d.v, unit), isBad ? "dn" : "up"]], o, d);
       });
     }, !it0.length);
   }
@@ -428,5 +439,5 @@
     }, !tasks0.length);
   }
 
-  window.BBI = { version: "1.2", columns, line, compare, ranking, waterfall, diverging, gantt, fmt, MON };
+  window.BBI = { version: "1.4", columns, line, compare, ranking, waterfall, diverging, gantt, fmt, MON };
 })();

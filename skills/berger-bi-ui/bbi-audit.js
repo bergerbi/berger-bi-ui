@@ -57,7 +57,8 @@
     const views = [...document.querySelectorAll("[data-screen-view]")];
     if (views.length && !views.some(v => !v.hidden && visible(v))) add("no screen visible", "data-screen-view", "check the URL hash");
     document.querySelectorAll(".chart").forEach(c => { if (visible(c) && !c.querySelector("svg")) add("chart not drawn", c.id || "chart", "no BBI.* call for this element?"); });
-    if (!document.querySelector(".bbi-chart svg") && document.querySelector(".chart")) add("no charts drawn", "page", "");
+    const shown = [...document.querySelectorAll(".chart")].filter(c => c.offsetParent);   // only the visible screen
+    if (shown.length && !shown.some(c => c.querySelector("svg"))) add("no charts drawn", "page", "");
     console.table(out);
     return out;
   };

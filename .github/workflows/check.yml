@@ -17,7 +17,7 @@ jobs:
         run: |
           test $(wc -c < skills/berger-bi-ui/SKILL.md) -le 4500 || { echo "SKILL.md over 4.5KB: move detail to docs/"; exit 1; }
           for f in skills/berger-bi-ui/docs/*.md; do test $(wc -c < "$f") -le 22000 || { echo "$f over 22KB"; exit 1; }; done
-          test $(wc -c < skills/berger-bi-ui/starter.html) -le 16000 || { echo "starter.html over 16KB"; exit 1; }
+          test $(wc -c < skills/berger-bi-ui/starter.html) -le 18000 || { echo "starter.html over 18KB"; exit 1; }
       - name: Built pages match the source
         run: |
           python -I tools/build_reference.py

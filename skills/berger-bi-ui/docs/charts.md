@@ -6,6 +6,8 @@ Draw into `<div class="chart" id="x"></div>`, placed inside a `.card`. The chart
 - `h3` states the finding, for example "ספטמבר נמוך ב-22% מהיעד", not "הכנסות לפי חודש".
 - `.sub` gives the measure, unit and period, for example "₪ · ינו–אוק 2026".
 - `.one` is optional, with the why or the next step in one line.
+- `.note` is a muted line at the bottom for how it was counted (open month, small base, holidays, what is excluded).
+- `.tools` (top corner) holds a `.seg` to switch granularity or series. Redraw the chart from its click handler.
 - The unit is repeated in the tooltip.
 
 Every call can take these options:
@@ -13,7 +15,7 @@ Every call can take these options:
 |---|---|
 | `title` | Accessible name for the chart. Always pass it. |
 | `yTitle` | Axis title, shown above the y axis. |
-| `unit` | `'₪'` (shows ₪14.2M), `'%'`, `'pp'` (נק׳), or none. |
+| `unit` | `'₪'`, `'%'`, `'pp'` (נק׳), or none. With `BBI.he = true` (the starter sets it) ₪ shows as `₪14.2 מיליון` / `₪62 אלף`, otherwise `₪14.2M`. |
 | `onClick(i, datum)` | Click handler, for example to filter the screen (`BBIShell.set(...)`). |
 
 Every chart shows a tooltip with a comparison, dims the other marks on hover, and runs a label-collision pass. Empty data shows "אין נתונים".
@@ -28,6 +30,6 @@ Every chart shows a tooltip with a comparison, dims the other marks on hover, an
 | Change by group | `BBI.diverging(el,{items:[{name,v}],good:'up'})` | Plus or minus around 0. Bad is red, good is green. |
 | Gantt | `BBI.gantt(el,{from,to,today,tasks:[{name,start,end,state,label}]})` | Dates are `'YYYY-MM-DD'`. `state` is one of done, active, late (red), todo, or milestone. Months switch to quarters when the range is long. Rows that don't fit show "+n שורות". |
 
-To format numbers the same way elsewhere, use `BBI.fmt(v, unit)`. It never uses `Intl` he-IL, which puts ₪ after the number.
+To format numbers the same way elsewhere, use `BBI.fmt(v, unit)`. It never uses `Intl` he-IL, which puts ₪ after the number. With `BBI.he` the number comes wrapped in LRI…PDI and the word follows, so set it with `textContent` in an RTL element, **not** inside `.n`. A plus sign goes inside the marks: `f.replace('⁦', '⁦+')`. SVG text ignores LRI, so the kit converts it (`vis()`).
 
 To add a chart type, add it to `bbi-charts.js` **in the shared repo**, not in a project's copy. Use the same helpers: `mount`, `nice`, `yAxis`, `xLabels`, `bind`, `tw`.
